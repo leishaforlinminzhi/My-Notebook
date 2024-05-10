@@ -13,11 +13,13 @@ import java.net.URL;
 
 
 public class HttpGetRequest {
-    public Object[] sendGetRequest(URL url) {
+    public Object[] sendGetRequest(String url) {
         Object[] res = new Object[2];
         res[1] = NULL;
         try {
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            url = "http://183.172.134.224:8080" + url;
+            URL path = new URL(url);
+            HttpURLConnection conn = (HttpURLConnection) path.openConnection();
 
             /// 请求方式
             conn.setRequestMethod("GET");

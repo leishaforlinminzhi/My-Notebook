@@ -2,11 +2,15 @@ package com.example.mynotebook;
 
 import static android.content.ContentValues.TAG;
 
+import static java.lang.Thread.sleep;
+
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -22,22 +26,23 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 
 
-public class MainActivity extends AppCompatActivity {
+public class RegisterActivity extends AppCompatActivity {
     //控件
     private TextView edit_username;
     private TextView edit_password;
-    private Button btn_login;
+    private Button btn_register;
 
     //全局变量
-    private boolean sign_login = false;
-    private int id = -1;
     private String res_type = "";
-    public static final String EXTRA_MESSAGE = "com.example.android.mynotebook.mainactivity.extra.MESSAGE";;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_register);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
         initView();
         initEvent();
     }
@@ -45,44 +50,40 @@ public class MainActivity extends AppCompatActivity {
     public void initView(){
         edit_username = this.findViewById(R.id.edit_username);
         edit_password = this.findViewById(R.id.edit_password);
-        btn_login = this.findViewById(R.id.btn_login);
+        btn_register = this.findViewById(R.id.btn_register);
     }
 
     public void initEvent(){
         //给登录按钮添加点击事件(登录)
-        btn_login.setOnClickListener(new View.OnClickListener() {
+        btn_register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //获取用户名和密码
-                sign_login = false;
                 res_type = "";
                 String username = edit_username.getText().toString();
                 String password = edit_password.getText().toString();
                 if (username.length()==0) {
-                    Toast.makeText(MainActivity.this, "请输入用户名", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RegisterActivity.this, "请输入用户名", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 if (password.length()==0) {
-                    Toast.makeText(MainActivity.this, "请输入密码", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RegisterActivity.this, "请输入密码", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                String url_path = "/user/login";
-                //调用API验证用户名密码是否正确
+                String url_path = "/user/save";
+
                 Thread thread = new Thread(new Runnable() {
                     @Override
                     public void run() {
                         String[][] requestHead = new String[0][2];
                         Object[][] requestBody = new Object[2][2];
-
                         HttpPostRequest request = new HttpPostRequest();
                         try {
                             Object[] res = request.sendPostRequest(url_path+"?username="+username+"&password="+password, requestHead, requestBody);
-                            Log.d(TAG, res[0].toString());
                             res_type = (String) res[0];
                             JSONObject jsonObject = new JSONObject(res[1].toString());
-                            id = jsonObject.getInt("id");
-                            if (id == -1){
+                            if (jsonObject.getInt("id") == -1){
                                 res_type = "DuplicateUsername";
                             }
                         } catch (UnsupportedEncodingException e) {
@@ -100,36 +101,28 @@ public class MainActivity extends AppCompatActivity {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                //登录事件
                 switch (res_type){
                     case "Success":
-                        sign_login = true;
-                        Toast.makeText(MainActivity.this, "登录成功", Toast.LENGTH_SHORT).show();
-                        GotoRegister(id);
+                        Toast.makeText(RegisterActivity.this, "注册成功", Toast.LENGTH_SHORT).show();
+                        try {
+                            sleep(1500);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                        finish();
                         break;
-                    case "FileNotFoundException":
-                        Toast.makeText(MainActivity.this, "密码错误", Toast.LENGTH_SHORT).show();
+                    case "DuplicateUsername":
+                        Toast.makeText(RegisterActivity.this, "用户名已存在", Toast.LENGTH_SHORT).show();
                         break;
                     case "ConnectException":
-                        Toast.makeText(MainActivity.this, "服务器连接失败", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(RegisterActivity.this, "服务器连接失败", Toast.LENGTH_SHORT).show();
                         break;
                     default:
-                        Toast.makeText(MainActivity.this, "未知错误", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(RegisterActivity.this, "未知错误", Toast.LENGTH_SHORT).show();
                         break;
                 }
             }
         });
-    }
-
-    public void GotoRegister(View view) {
-        Intent intent = new Intent(this, RegisterActivity.class);
-        startActivity(intent);
-    }
-    public void GotoRegister(int id) {
-        Intent intent = new Intent(this, NotebookActivity.class);
-        String idText = Integer.toString(id);
-        intent.putExtra(EXTRA_MESSAGE, idText);
-        startActivity(intent);
     }
 
 }

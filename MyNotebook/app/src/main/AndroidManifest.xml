@@ -26,6 +26,34 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".RegisterActivity"
+            android:label = "RegisterActivity"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+        <activity
+            android:name=".NotebookActivity"
+            android:label = "NotebookActivity"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+        <activity
+            android:name=".fragment.fragment_add"
+            android:exported="false" />
+        <activity
+            android:name=".fragment.fragment_mine"
+            android:exported="false" />
+        <activity
+            android:name=".fragment.fragment_record"
+            android:exported="false" />
+        <activity
+            android:name=".fragment.fragment_llm"
+            android:exported="false" />
     </application>
 
 </manifest>

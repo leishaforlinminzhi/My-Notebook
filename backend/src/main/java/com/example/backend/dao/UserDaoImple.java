@@ -1,6 +1,5 @@
 package com.example.backend.dao;
 
-import com.example.backend.dao.UserDao;
 import com.example.backend.entity.User;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 @Repository
 public class UserDaoImple  implements UserDao {
@@ -18,7 +18,7 @@ public class UserDaoImple  implements UserDao {
 
     @Override
     public int insert(User user) {
-        String sql = "insert into Users(id,username,password) values(?,?,?)";
+        String sql = "insert into Users(id,name,password) values(?,?,?)";
         return this.jdbcTemplate.update(
                 sql,
                 user.getId(),
@@ -70,5 +70,17 @@ public class UserDaoImple  implements UserDao {
             user.setPassword(resultSet.getString("password"));
             return user;
         }, name,password);
+    }
+
+    @Override
+    public List<Integer> getAllUserIds(){
+        String sql = "select id from Users";
+        return this.jdbcTemplate.queryForList(sql, Integer.class);
+    }
+
+    @Override
+    public List<String> getAllUsernames(){
+        String sql = "select name from Users";
+        return this.jdbcTemplate.queryForList(sql, String.class);
     }
 }

@@ -1,5 +1,7 @@
 package com.example.backend.entity;
 
+import java.util.List;
+
 public class User {
     private int id;
 

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Random;
 
 @RestController
@@ -17,12 +18,26 @@ public class UserController {
 
     @RequestMapping("/save")
     @ResponseBody
-    public User save() {
+    public User save(String username, String password) {
         User user = new User();
-        int id = new Random().nextInt(10000);
+
+        List<String> names = this.userService.getAllUsernames();
+        if (names.contains(username)) {
+            user.setId(-1);
+            user.setUsername(username);
+            user.setPassword(password);
+            return user;
+        }
+
+        int id;
+        List<Integer> ids = this.userService.getAllUserIds();
+        do {
+            id = new Random().nextInt(10000); // 生成随机的 ID
+        } while (ids.contains(id));
+
         user.setId(id);
-        user.setUsername("张三" + id);
-        user.setPassword("zhangsan" + id);
+        user.setUsername(username);
+        user.setPassword(password);
 
         int result = this.userService.insert(user);
         System.out.println(result);

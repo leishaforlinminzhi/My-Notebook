@@ -9,12 +9,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.EOFException;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.SocketException;
 import java.net.URL;
 
 import java.net.URLEncoder;
@@ -26,6 +30,7 @@ public class HttpPostRequest {
         Object[] res = new Object[2];
         res[1] = NULL;
         try {
+            url = "http://183.172.134.224:8080" + url;
             URL path = new URL(url);
             HttpURLConnection con = (HttpURLConnection) path.openConnection();
 
@@ -47,12 +52,12 @@ public class HttpPostRequest {
 //            }
 //            Log.d(TAG, param.toString());
 
-            String rB = "username=linminzhi&password=030603lmz";
-            byte[] param = rB.getBytes(StandardCharsets.UTF_8);
-
-            OutputStreamWriter writer = new OutputStreamWriter(con.getOutputStream(),"UTF-8");
-            writer.write(param.toString());
-            writer.flush();
+//            String rB = "username=linminzhi&password=030603lmz";
+//            byte[] param = rB.getBytes(StandardCharsets.UTF_8);
+//
+//            OutputStreamWriter writer = new OutputStreamWriter(con.getOutputStream(),"UTF-8");
+//            writer.write(param.toString());
+//            writer.flush();
 
             // 获取服务端响应，通过输入流来读取URL的响应
             InputStream is = con.getInputStream();
@@ -70,7 +75,7 @@ public class HttpPostRequest {
 
             // 打印读到的响应结果
             System.out.println("运行结束："+sbf.toString());
-            res[0] = 200;
+            res[0] = "Success";
             res[1] = sbf;
             return res;
 
@@ -79,7 +84,13 @@ public class HttpPostRequest {
             res[0] = -1;
         }catch (IOException e) {
             e.printStackTrace();
-            res[0] = -2;
+            if (e instanceof FileNotFoundException) {
+                res[0] = "FileNotFoundException";
+            } else if (e instanceof ConnectException) {
+                res[0] = "ConnectException";
+            } else {
+                res[0] = "Unkown";
+            }
         }
         return res;
     }
