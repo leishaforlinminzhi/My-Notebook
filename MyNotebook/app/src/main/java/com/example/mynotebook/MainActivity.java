@@ -1,5 +1,6 @@
 package com.example.mynotebook;
 
+
 import static android.content.ContentValues.TAG;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -105,6 +106,8 @@ public class MainActivity extends AppCompatActivity {
                     case "Success":
                         sign_login = true;
                         Toast.makeText(MainActivity.this, "登录成功", Toast.LENGTH_SHORT).show();
+                        GlobalValue app = (GlobalValue) getApplication();
+                        app.setId(id);
                         GotoRegister(id);
                         break;
                     case "FileNotFoundException":

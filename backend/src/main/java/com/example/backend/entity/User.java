@@ -9,6 +9,10 @@ public class User {
 
     private String password;
 
+    private String signature;
+
+    private String avatar;
+
     public int getId() {
         return id;
     }
@@ -33,12 +37,22 @@ public class User {
         this.password = password;
     }
 
+    public String getSignature() { return signature; }
+
+    public void setSignature(String signature) { this.signature = signature; }
+
+    public String getAvatar() { return avatar; }
+
+    public void setAvatar(String avatar) { this.avatar = avatar; }
+
     @Override
     public String toString() {
         return "User{" +
                 "id=" + id +
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
+                ", avatar='" + avatar + '\'' +
+                ", signature='" + signature + '\'' +
                 '}';
     }
 }

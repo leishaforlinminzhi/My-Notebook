@@ -5,10 +5,10 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
-import com.example.mynotebook.fragment.AddFragment;
-import com.example.mynotebook.fragment.LLMFragment;
-import com.example.mynotebook.fragment.MineFragment;
-import com.example.mynotebook.fragment.RecordFragment;
+import com.example.mynotebook.fragment.fragment_add;
+import com.example.mynotebook.fragment.fragment_llm;
+import com.example.mynotebook.fragment.fragment_mine;
+import com.example.mynotebook.fragment.fragment_record;
 
 public class MyPagerAdapter extends FragmentPagerAdapter {
     private static final int NUM_PAGES = 4;
@@ -17,20 +17,20 @@ public class MyPagerAdapter extends FragmentPagerAdapter {
         super(fm);
     }
 
-    private static final String[] PAGE_TITLES = {"笔记", "添加", "智能", "我的"};
+    private static final String[] PAGE_TITLES = {"笔记", "添加", "LLM", "我的"};
 
     @NonNull
     @Override
     public Fragment getItem(int position) {
         switch (position) {
             case 0:
-                return new RecordFragment();
+                return new fragment_record();
             case 1:
-                return new AddFragment();
+                return new fragment_add();
             case 2:
-                return new LLMFragment();
+                return new fragment_llm();
             case 3:
-                return new MineFragment();
+                return new fragment_mine();
             default:
                 return null;
         }

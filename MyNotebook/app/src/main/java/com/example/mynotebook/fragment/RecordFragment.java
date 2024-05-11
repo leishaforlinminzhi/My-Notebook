@@ -1,21 +1,21 @@
 package com.example.mynotebook.fragment;
 
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.mynotebook.GlobalValue;
 import com.example.mynotebook.R;
 
-public class RecordFragment extends Fragment {
-    @Nullable
+public class RecordFragment extends AppCompatActivity {
+    private Integer id = null;
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.activity_fragment_record, container, false);
-        // 初始化布局
-        return view;
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_fragment_record);
+
+        GlobalValue app = (GlobalValue) getApplication();
+        id = app.getId();
     }
 }
+

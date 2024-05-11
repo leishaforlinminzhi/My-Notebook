@@ -16,7 +16,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyNotebook"
         tools:targetApi="31"
-        android:usesCleartextTraffic="true">
+        android:usesCleartextTraffic="true"
+        android:name=".GlobalValue">
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -43,16 +44,16 @@
                 android:value=".MainActivity" />
         </activity>
         <activity
-            android:name=".fragment.fragment_add"
+            android:name=".fragment.AddFragment"
             android:exported="false" />
         <activity
-            android:name=".fragment.fragment_mine"
+            android:name=".fragment.MineFragment"
             android:exported="false" />
         <activity
-            android:name=".fragment.fragment_record"
+            android:name=".fragment.RecordFragment"
             android:exported="false" />
         <activity
-            android:name=".fragment.fragment_llm"
+            android:name=".fragment.LLMFragment"
             android:exported="false" />
     </application>
 

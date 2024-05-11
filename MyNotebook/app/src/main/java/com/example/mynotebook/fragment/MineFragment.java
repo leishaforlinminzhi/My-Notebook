@@ -1,21 +1,33 @@
 package com.example.mynotebook.fragment;
 
+import static android.content.ContentValues.TAG;
+
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.util.Log;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.mynotebook.GlobalValue;
+import com.example.mynotebook.MainActivity;
 import com.example.mynotebook.R;
+import com.example.mynotebook.utils.HttpPostRequest;
 
-public class MineFragment extends Fragment {
-    @Nullable
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+
+public class MineFragment extends AppCompatActivity {
+
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.activity_fragment_mine, container, false);
-        // 初始化布局
-        return view;
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_fragment_mine);
+
     }
 }

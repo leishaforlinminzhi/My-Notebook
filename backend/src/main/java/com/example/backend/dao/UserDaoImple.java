@@ -23,7 +23,9 @@ public class UserDaoImple  implements UserDao {
                 sql,
                 user.getId(),
                 user.getUsername(),
-                user.getPassword()
+                user.getPassword(),
+                user.getSignature(),
+                user.getAvatar()
         );
     }
 
@@ -38,8 +40,11 @@ public class UserDaoImple  implements UserDao {
         String sql = "update Users set password = ? where id = ?";
         return this.jdbcTemplate.update(
                 sql,
+                user.getId(),
+                user.getUsername(),
                 user.getPassword(),
-                user.getId()
+                user.getSignature(),
+                user.getAvatar()
         );
     }
 
@@ -53,6 +58,9 @@ public class UserDaoImple  implements UserDao {
                 user.setId(resultSet.getInt("id"));
                 user.setUsername(resultSet.getString("name"));
                 user.setPassword(resultSet.getString("password"));
+                user.setSignature(resultSet.getString("signature"));
+                user.setAvatar(resultSet.getString("avatar"));
+                System.out.println(resultSet.getString("signature"));
                 return user;
             }
         }, id);
