@@ -5,6 +5,9 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/><!-- SD读取 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> <!-- SD写入 -->
+
 
     <application
         android:allowBackup="true"
@@ -43,18 +46,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
-        <activity
-            android:name=".fragment.AddFragment"
-            android:exported="false" />
-        <activity
-            android:name=".fragment.MineFragment"
-            android:exported="false" />
-        <activity
-            android:name=".fragment.RecordFragment"
-            android:exported="false" />
-        <activity
-            android:name=".fragment.LLMFragment"
-            android:exported="false" />
     </application>
 
 </manifest>

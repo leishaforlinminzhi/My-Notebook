@@ -8,6 +8,19 @@
     tools:context=".MainActivity">
 
 
+    <Button
+        android:id="@+id/changeInfoButton"
+        android:layout_width="376dp"
+        android:layout_height="44dp"
+        android:text="修改个人资料"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.457"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
+        app:layout_constraintVertical_bias="0.156"
+        tools:ignore="MissingConstraints" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout"
         android:layout_width="376dp"
@@ -22,8 +35,8 @@
 
         <ImageView
             android:id="@+id/avatarImageView"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="117dp"
+            android:layout_height="112dp"
             android:layout_centerHorizontal="true"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -31,7 +44,8 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.494"
-            tools:ignore="MissingConstraints" />
+            tools:ignore="MissingConstraints"
+            android:scaleType="centerCrop"/>
 
         <TextView
             android:id="@+id/usernameTextView"
@@ -70,10 +84,10 @@
 
 
     <Button
-        android:id="@+id/changeInfoButton"
+        android:id="@+id/changeAvatarButton"
         android:layout_width="376dp"
         android:layout_height="44dp"
-        android:text="修改个人资料"
+        android:text="修改头像"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.457"
@@ -92,7 +106,7 @@
         app:layout_constraintHorizontal_bias="0.457"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
-        app:layout_constraintVertical_bias="0.17"
+        app:layout_constraintVertical_bias="0.286"
         tools:ignore="MissingConstraints" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

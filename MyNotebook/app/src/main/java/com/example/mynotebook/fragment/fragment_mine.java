@@ -3,6 +3,7 @@ package com.example.mynotebook.fragment;
 import static android.content.ContentValues.TAG;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -10,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,6 +33,7 @@ import java.net.MalformedURLException;
 
 public class fragment_mine extends Fragment {
 
+    private static final int UPLOAD_IMAGE_REQUEST = 1;
     private Integer id = null;
     private String username = null;
     private String avatar = null;
@@ -41,8 +44,10 @@ public class fragment_mine extends Fragment {
     private TextView view_signature;
     private Button btn_info;
     private Button btn_password;
+    private Button btn_avatar;
 
-    private View view = null;
+
+    private Uri currentPictureUrl = null;
 
     private void getInfo(){
         String url_path = "/user/getById";
@@ -77,26 +82,58 @@ public class fragment_mine extends Fragment {
         }
     }
 
+    public void uploadPicture(View view) {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(intent, UPLOAD_IMAGE_REQUEST);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data){
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == UPLOAD_IMAGE_REQUEST  && data != null && data.getData() != null) {
+            currentPictureUrl = data.getData();
+            image_avatar.setImageURI(currentPictureUrl);
+        }
+    }
+
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         getInfo();
 
-        System.out.println("here");
+
         if (username != null)
             view_username.setText(username);
         if (signature != null)
             view_signature.setText(signature);
 
+        btn_avatar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                uploadPicture(v);
+            }
+        });
+
         btn_info.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(intent, 1);
+                System.out.println("here");
             }
         });
+
+        btn_password.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                System.out.println("here");
+            }
+        });
+
+
     }
+
+
 
     @Nullable
     @Override
@@ -105,13 +142,13 @@ public class fragment_mine extends Fragment {
 
         GlobalValue app = (GlobalValue) requireActivity().getApplication();;
         id = app.getId();
-        System.out.println(id);
 
         image_avatar = view.findViewById(R.id.avatarImageView);
         view_username = view.findViewById(R.id.usernameTextView);
         view_signature = view.findViewById(R.id.signatureTextView);
         btn_info = view.findViewById(R.id.changeInfoButton);
         btn_password = view.findViewById(R.id.changePasswordButton);
+        btn_avatar = view.findViewById(R.id.changeAvatarButton);
 
         return view;
     }
