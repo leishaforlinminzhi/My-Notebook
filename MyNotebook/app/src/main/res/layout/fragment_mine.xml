@@ -9,16 +9,35 @@
 
 
     <Button
-        android:id="@+id/changeInfoButton"
+        android:id="@+id/changeSignatureButton"
         android:layout_width="376dp"
         android:layout_height="44dp"
-        android:text="修改个人资料"
+        android:background="#23673AB7"
+        android:text="修改签名"
+        android:textAlignment="textStart"
+        android:textColor="#1B0740"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.457"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
-        app:layout_constraintVertical_bias="0.156"
+        app:layout_constraintVertical_bias="0.163"
+        tools:ignore="MissingConstraints" />
+
+    <Button
+        android:id="@+id/changeNameButton"
+        android:layout_width="376dp"
+        android:layout_height="44dp"
+        android:background="#23673AB7"
+        android:text="修改用户名"
+        android:textAlignment="textStart"
+        android:textColor="#1B0740"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.457"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
+        app:layout_constraintVertical_bias="0.293"
         tools:ignore="MissingConstraints" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -87,7 +106,10 @@
         android:id="@+id/changeAvatarButton"
         android:layout_width="376dp"
         android:layout_height="44dp"
+        android:background="#23673AB7"
         android:text="修改头像"
+        android:textAlignment="textStart"
+        android:textColor="#1B0740"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.457"
@@ -100,13 +122,24 @@
         android:id="@+id/changePasswordButton"
         android:layout_width="376dp"
         android:layout_height="44dp"
+        android:background="#23673AB7"
         android:text="修改密码"
+        android:textAlignment="textStart"
+        android:textColor="#1B0740"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.457"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
-        app:layout_constraintVertical_bias="0.286"
+        app:layout_constraintVertical_bias="0.423"
         tools:ignore="MissingConstraints" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="10dp"
+        android:background="@color/black"
+        app:layout_constraintBottom_toTopOf="@+id/changeAvatarButton"
+        app:layout_constraintTop_toBottomOf="@+id/changeAvatarButton" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

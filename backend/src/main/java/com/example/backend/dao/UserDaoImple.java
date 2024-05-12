@@ -18,7 +18,7 @@ public class UserDaoImple  implements UserDao {
 
     @Override
     public int insert(User user) {
-        String sql = "insert into Users(id,name,password) values(?,?,?)";
+        String sql = "insert into Users(id,name,password,signature,avatar) values(?,?,?,?,?)";
         return this.jdbcTemplate.update(
                 sql,
                 user.getId(),
@@ -36,15 +36,42 @@ public class UserDaoImple  implements UserDao {
     }
 
     @Override
-    public int update(User user) {
+    public int updatePassword(User user) {
         String sql = "update Users set password = ? where id = ?";
         return this.jdbcTemplate.update(
                 sql,
-                user.getId(),
-                user.getUsername(),
                 user.getPassword(),
+                user.getId()
+        );
+    }
+
+    @Override
+    public int updateSignature(User user) {
+        String sql = "update Users set signature = ? where id = ?";
+        return this.jdbcTemplate.update(
+                sql,
                 user.getSignature(),
-                user.getAvatar()
+                user.getId()
+        );
+    }
+
+    @Override
+    public int updateName(User user) {
+        String sql = "update Users set name = ? where id = ?";
+        return this.jdbcTemplate.update(
+                sql,
+                user.getUsername(),
+                user.getId()
+        );
+    }
+
+    @Override
+    public int updateAvatar(User user) {
+        String sql = "update Users set avatar = ? where id = ?";
+        return this.jdbcTemplate.update(
+                sql,
+                user.getAvatar(),
+                user.getId()
         );
     }
 

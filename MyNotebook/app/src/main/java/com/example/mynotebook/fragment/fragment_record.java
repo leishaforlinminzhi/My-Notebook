@@ -14,7 +14,7 @@ public class fragment_record extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.activity_fragment_record, container, false);
+        View view = inflater.inflate(R.layout.fragment_record, container, false);
         // 初始化布局
         return view;
     }

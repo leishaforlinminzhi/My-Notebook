@@ -71,11 +71,10 @@ public class RegisterActivity extends AppCompatActivity {
                     return;
                 }
 
-                String url_path = "/user/save";
-
                 Thread thread = new Thread(new Runnable() {
                     @Override
                     public void run() {
+                        String url_path = "/user/save";
                         String[][] requestHead = new String[0][2];
                         Object[][] requestBody = new Object[2][2];
                         HttpPostRequest request = new HttpPostRequest();

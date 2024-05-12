@@ -68,23 +68,27 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 
-                String url_path = "/user/login";
                 //调用API验证用户名密码是否正确
                 Thread thread = new Thread(new Runnable() {
                     @Override
                     public void run() {
+                        String url_path = "/user/login";
                         String[][] requestHead = new String[0][2];
                         Object[][] requestBody = new Object[2][2];
 
                         HttpPostRequest request = new HttpPostRequest();
                         try {
                             Object[] res = request.sendPostRequest(url_path+"?username="+username+"&password="+password, requestHead, requestBody);
-                            Log.d(TAG, res[0].toString());
                             res_type = (String) res[0];
-                            JSONObject jsonObject = new JSONObject(res[1].toString());
-                            id = jsonObject.getInt("id");
-                            if (id == -1){
-                                res_type = "DuplicateUsername";
+                            Log.d(TAG, res[0].toString());
+                            Log.d(TAG, res[1].toString());
+                            switch (res_type){
+                                case "Success":
+                                    JSONObject jsonObject = new JSONObject(res[1].toString());
+                                    id = jsonObject.getInt("id");
+                                    if (id == -1){
+                                        res_type = "DuplicateUsername";
+                                    }
                             }
                         } catch (UnsupportedEncodingException e) {
                             throw new RuntimeException(e);
@@ -105,10 +109,11 @@ public class MainActivity extends AppCompatActivity {
                 switch (res_type){
                     case "Success":
                         sign_login = true;
+                        Log.d(TAG, Integer.toString(id));
                         Toast.makeText(MainActivity.this, "登录成功", Toast.LENGTH_SHORT).show();
                         GlobalValue app = (GlobalValue) getApplication();
                         app.setId(id);
-                        GotoRegister(id);
+                        GotoNotebook(id);
                         break;
                     case "FileNotFoundException":
                         Toast.makeText(MainActivity.this, "密码错误", Toast.LENGTH_SHORT).show();
@@ -128,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, RegisterActivity.class);
         startActivity(intent);
     }
-    public void GotoRegister(int id) {
+    public void GotoNotebook(int id) {
         Intent intent = new Intent(this, NotebookActivity.class);
         String idText = Integer.toString(id);
         intent.putExtra(EXTRA_MESSAGE, idText);

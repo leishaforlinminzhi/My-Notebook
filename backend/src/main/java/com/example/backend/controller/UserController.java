@@ -38,6 +38,8 @@ public class UserController {
         user.setId(id);
         user.setUsername(username);
         user.setPassword(password);
+        user.setAvatar(null);
+        user.setSignature(null);
 
         int result = this.userService.insert(user);
         System.out.println(result);
@@ -51,19 +53,35 @@ public class UserController {
     }
 
     @RequestMapping("/update")
-    public void update() {
+    public void update(Integer id, String type, String info) {
         User user = new User();
-        user.setId(1);
-        user.setPassword("test123");
-        this.userService.update(user);
+        user.setId(id);
+        switch (type) {
+            case "password":
+                user.setPassword(info);
+                this.userService.updatePassword(user);
+                break;
+            case "signature":
+                user.setSignature(info);
+                this.userService.updateSignature(user);
+                break;
+            case "name":
+                user.setUsername(info);
+                this.userService.updateName(user);
+                break;
+            case "avatar":
+                user.setAvatar(info);
+                this.userService.updateAvatar(user);
+                break;
+            default:
+                break;
+        }
     }
 
     @RequestMapping("/getById")
     @ResponseBody
     public User getById(Integer id) {
         User user = this.userService.getById(id);
-        System.out.println(user.getUsername());
-        System.out.println(user.toString());
         return user;
     }
 

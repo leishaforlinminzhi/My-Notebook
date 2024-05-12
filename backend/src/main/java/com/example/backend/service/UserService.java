@@ -10,7 +10,13 @@ public interface UserService {
 
     int deleteById(Integer id);
 
-    int update(User user);
+    int updatePassword(User user);
+
+    int updateSignature(User user);
+
+    int updateName(User user);
+
+    int updateAvatar(User user);
 
     User getById(Integer id);
 
