@@ -51,6 +51,25 @@ public class fragment_mine extends Fragment {
     private Button btn_avatar;
     private Uri currentPictureUrl = null;
 
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_mine, container, false);
+
+        GlobalValue app = (GlobalValue) requireActivity().getApplication();;
+        id = app.getId();
+
+        image_avatar = view.findViewById(R.id.avatarImageView);
+        view_username = view.findViewById(R.id.usernameTextView);
+        view_signature = view.findViewById(R.id.signatureTextView);
+        btn_name = view.findViewById(R.id.changeNameButton);
+        btn_signature = view.findViewById(R.id.changeSignatureButton);
+        btn_password = view.findViewById(R.id.changePasswordButton);
+        btn_avatar = view.findViewById(R.id.changeAvatarButton);
+
+        return view;
+    }
+
     private void getInfo(){
         String url_path = "/user/getById";
         Thread thread = new Thread(new Runnable() {
@@ -168,26 +187,6 @@ public class fragment_mine extends Fragment {
         }
     }
 
-
-
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_mine, container, false);
-
-        GlobalValue app = (GlobalValue) requireActivity().getApplication();;
-        id = app.getId();
-
-        image_avatar = view.findViewById(R.id.avatarImageView);
-        view_username = view.findViewById(R.id.usernameTextView);
-        view_signature = view.findViewById(R.id.signatureTextView);
-        btn_name = view.findViewById(R.id.changeNameButton);
-        btn_signature = view.findViewById(R.id.changeSignatureButton);
-        btn_password = view.findViewById(R.id.changePasswordButton);
-        btn_avatar = view.findViewById(R.id.changeAvatarButton);
-
-        return view;
-    }
 
     @Override
     public void onResume() {
