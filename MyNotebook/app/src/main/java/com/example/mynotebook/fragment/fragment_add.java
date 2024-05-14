@@ -51,6 +51,7 @@ public class fragment_add extends Fragment {
     private Button btn_addphotos;
     private Button btn_addvoice;
     private Button btn_addtag;
+    private Button btn_ok;
     private ChipGroup chipGroup;
     private List<Uri> selectedPhotos;
     private com.example.mynotebook.fragment.PhotoAdapter photoAdapter;
@@ -112,19 +113,8 @@ public class fragment_add extends Fragment {
             public void onClick(View v) {
                     if(!voiceRecording) {
                         checkPermission();
-                        fileName = Environment.getExternalStorageDirectory().getAbsolutePath() + "/recording.3gp";
-                        recorder = new MediaRecorder();
-                        recorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
-                        recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-                        recorder.setOutputFile(fileName);
-                        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 
-                        try {
-                            recorder.prepare();
-                            recorder.start();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                        // TODO:录音
 
                         Toast.makeText(getActivity(), "Recording started", Toast.LENGTH_SHORT).show();
                         btn_addvoice.setText("停止录音");
@@ -140,6 +130,14 @@ public class fragment_add extends Fragment {
                     }
             }
         });
+
+        btn_ok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // TODO:将事件发送给后端
+            }
+        });
+
 
         chipGroup.setOnCheckedChangeListener(new ChipGroup.OnCheckedChangeListener() {
             @Override
