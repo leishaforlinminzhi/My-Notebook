@@ -154,7 +154,6 @@ public class fragment_mine extends Fragment {
                 HttpPostRequest request = new HttpPostRequest();
                 try {
                     Object[] res = request.sendPostRequest(url_path+"?id="+id+"&type="+type+"&info="+info, requestHead, requestBody);
-                    Log.d(TAG, res[0].toString());
                     res_type = res[0].toString();
                 } catch (UnsupportedEncodingException e) {
                     throw new RuntimeException(e);
