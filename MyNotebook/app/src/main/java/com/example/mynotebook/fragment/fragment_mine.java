@@ -6,10 +6,18 @@ import static com.example.mynotebook.MainActivity.EXTRA_MESSAGE;
 
 import static java.lang.Thread.sleep;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,7 +27,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
 import com.example.mynotebook.GlobalValue;
@@ -29,14 +41,22 @@ import com.example.mynotebook.utils.HttpPostRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URL;
 
 
 public class fragment_mine extends Fragment {
 
     private static final int UPLOAD_IMAGE_REQUEST = 1;
-    private static final int INPUT_CHANGE_INFO = 2;
+    private static final int TAKE_PHOTO_REQUEST = 2;
+    private static final int INPUT_CHANGE_INFO = 3;
+    private Uri photoUri;
     private String res_type = "";
     private Integer id = null;
     private String username = null;
@@ -51,9 +71,15 @@ public class fragment_mine extends Fragment {
     private Button btn_avatar;
     private Uri currentPictureUrl = null;
 
+    private void openImagePicker() {
+        Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(intent, UPLOAD_IMAGE_REQUEST);
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.fragment_mine, container, false);
 
         GlobalValue app = (GlobalValue) requireActivity().getApplication();;
@@ -117,9 +143,16 @@ public class fragment_mine extends Fragment {
                 if(data != null && data.getData() != null){
                     currentPictureUrl = data.getData();
                     image_avatar.setImageURI(currentPictureUrl);
+                    Bitmap bitmap = null;
+                    try {
+                        bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), currentPictureUrl);
+                        saveImageToAppDirectory(bitmap, (Integer.toString(id)+"avatar.png"));
+                        changeAvatar(Integer.toString(id)+"avatar.png");
+                    } catch (IOException e) {
+//                        throw new RuntimeException(e);
+                        Toast.makeText(getContext(), "查找图片文件失败", Toast.LENGTH_SHORT).show();
+                    }
                 }
-                changeAvatar(currentPictureUrl);
-                Log.d(TAG, currentPictureUrl.toString());
                 break;
             case INPUT_CHANGE_INFO:
                 onResume();
@@ -141,8 +174,7 @@ public class fragment_mine extends Fragment {
         startActivityForResult(intent, INPUT_CHANGE_INFO);
     }
 
-    private void changeAvatar(Uri Url){
-        String info = Url.toString();
+    private void changeAvatar(String info){
         String type = "avatar";
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -191,9 +223,16 @@ public class fragment_mine extends Fragment {
     public void onResume() {
         super.onResume();
         getInfo();
-//        avatar = avatar.replace("\\/", "/");
-//        Log.d(TAG, avatar);
-//        image_avatar.setImageURI(Uri.parse(avatar));
+
+        File externalFilesDir = getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        if (externalFilesDir != null) {
+            File imageFile = new File(externalFilesDir, Integer.toString(id)+"avatar.png");
+            if (imageFile.exists()) {
+                Bitmap bitmap =BitmapFactory.decodeFile(imageFile.getAbsolutePath());
+                image_avatar.setImageBitmap(bitmap);
+            }
+        }
+
         view_username.setText(username);
         view_signature.setText(signature);
         btn_avatar.setOnClickListener(new View.OnClickListener() {
@@ -220,6 +259,24 @@ public class fragment_mine extends Fragment {
                 gotoChangeInfo("signature");
             }
         });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[]
+            grantResults) {
+
+    }
+    private void saveImageToAppDirectory(Bitmap bitmap, String fileName) {
+        File externalFilesDir = getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        if (externalFilesDir != null) {
+            File imageFile = new File(externalFilesDir, fileName);
+            try (FileOutputStream fos = new FileOutputStream(imageFile)) {
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                fos.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }

@@ -3,7 +3,12 @@ package com.example.mynotebook.fragment;
 import static android.app.Activity.RESULT_OK;
 import static android.content.ContentValues.TAG;
 
+import static androidx.core.content.ContextCompat.getSystemService;
+import static com.google.android.material.internal.ViewUtils.hideKeyboard;
+import static java.lang.System.in;
+
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.MediaRecorder;
@@ -19,6 +24,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -46,6 +52,8 @@ import androidx.core.content.ContextCompat;
 public class fragment_add extends Fragment {
     private Integer id = null;
     private static final int REQUEST_CODE_SELECT_PHOTOS = 1;
+    private EditText input_title;
+    private EditText input_text;
     private EditText input_tag ;
     private GridView gridViewPhotos;
     private Button btn_addphotos;
@@ -55,10 +63,6 @@ public class fragment_add extends Fragment {
     private ChipGroup chipGroup;
     private List<Uri> selectedPhotos;
     private com.example.mynotebook.fragment.PhotoAdapter photoAdapter;
-    private ArrayList<String> selectedChipTexts = new ArrayList<>();
-    public ArrayList<String> getSelectedChipTexts() {
-        return selectedChipTexts;
-    }
     private MediaRecorder recorder;
     private String fileName = null;
     private boolean voiceRecording = false;
@@ -71,12 +75,15 @@ public class fragment_add extends Fragment {
         GlobalValue app = (GlobalValue) requireActivity().getApplication();;
         id = app.getId();
 
+        input_title = view.findViewById(R.id.edit_title);
+        input_text = view.findViewById(R.id.edit_text);
         input_tag = view.findViewById(R.id.edit_tag);
 
         gridViewPhotos = view.findViewById(R.id.gridViewPhotos);
         btn_addphotos = view.findViewById(R.id.btnAddPhotos);
         btn_addvoice = view.findViewById(R.id.btnAddVoice);
         btn_addtag = view.findViewById(R.id.btnAddTag);
+        btn_ok = view.findViewById(R.id.btnok);
         chipGroup = view.findViewById(R.id.chipGroup);
 
         selectedPhotos = new ArrayList<>();
@@ -105,6 +112,7 @@ public class fragment_add extends Fragment {
             @Override
             public void onClick(View v) {
                 input_tag.setVisibility(View.VISIBLE);
+                input_tag.requestFocus();
             }
         });
 
@@ -135,18 +143,44 @@ public class fragment_add extends Fragment {
             @Override
             public void onClick(View v) {
                 // TODO:将事件发送给后端
-            }
-        });
 
-
-        chipGroup.setOnCheckedChangeListener(new ChipGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(ChipGroup group, int checkedId) {
-                Chip chip = group.findViewById(checkedId);
-                if (chip != null) {
-                    String chipText = chip.getText().toString();
-                    Toast.makeText(getContext(), "Selected Chip: " + chipText, Toast.LENGTH_SHORT).show();
+                // 标题信息
+                String title = null;
+                title = input_title.getText().toString();
+                if (title.length() == 0){
+                    Toast.makeText(getActivity(), "请输入标题", Toast.LENGTH_SHORT).show();
+                    return;
                 }
+
+                // 正文信息
+                String text = null;
+                text = input_text.getText().toString();
+                if (text.length() == 0){
+                    Toast.makeText(getActivity(), "请输入正文", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                // 图片
+
+                // 语音
+
+                // tag 信息
+                ArrayList<String> selectedChipTexts = new ArrayList<>();
+                for (int i = 0; i < chipGroup.getChildCount(); i++) {
+                    View view = chipGroup.getChildAt(i);
+                    if (view instanceof Chip) {
+                        Chip chip = (Chip) view;
+                        // 为每个Chip添加相同的点击监听器函数
+                        if (chip.isChecked()) {
+                            // 如果Chip被选中，则执行相应的逻辑
+                            selectedChipTexts.add(chip.getText().toString());
+                        }
+                    }
+                }
+                Log.d(TAG, title);
+                Log.d(TAG, text);
+                Log.d(TAG, selectedPhotos.toString());
+                Log.d(TAG, selectedChipTexts.toString());
+
             }
         });
 
@@ -154,15 +188,28 @@ public class fragment_add extends Fragment {
         input_tag.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-
                 Log.d(TAG, "here");
                 String chipText = input_tag.getText().toString();
                 Chip chip = new Chip(requireContext());
                 chip.setText(chipText);
                 chip.setCheckable(true);
+                chip.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Chip chip = (Chip) v;
+                        if (chip.isChecked()) {
+                            // 如果Chip被选中，则执行相应的逻辑
+//                            selectedChipTexts.add(chip.getText().toString());
+                            Log.d(TAG, "Chip selected: " + chip.getText().toString());
+                        } else {
+                            // 如果Chip被取消选中，则执行相应的逻辑
+//                            selectedChipTexts.remove(chip.getText().toString());
+                            Log.d(TAG, "Chip deselected: " + chip.getText().toString());
+                        }
+                    }
+                });
 
                 chipGroup.addView(chip);
-                selectedChipTexts.add(chipText);
                 input_tag.setText("");
                 input_tag.setVisibility(View.INVISIBLE);
 
@@ -200,7 +247,7 @@ public class fragment_add extends Fragment {
 
     private void checkPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            String[] permissions = new String[]{Manifest.permission.RECORD_AUDIO,Manifest.permission.WRITE_EXTERNAL_STORAGE};
+            String[] permissions = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE};
             for (String permission : permissions) {
                 if (ContextCompat.checkSelfPermission(getActivity(), permission) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(getActivity(), permissions, 200);
