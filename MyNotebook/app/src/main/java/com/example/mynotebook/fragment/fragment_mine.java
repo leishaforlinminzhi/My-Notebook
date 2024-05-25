@@ -1,5 +1,6 @@
 package com.example.mynotebook.fragment;
 
+import static android.app.Activity.RESULT_OK;
 import static android.content.ContentValues.TAG;
 
 import static com.example.mynotebook.MainActivity.EXTRA_MESSAGE;
@@ -7,6 +8,8 @@ import static com.example.mynotebook.MainActivity.EXTRA_MESSAGE;
 import static java.lang.Thread.sleep;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -49,6 +52,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 public class fragment_mine extends Fragment {
@@ -56,6 +61,7 @@ public class fragment_mine extends Fragment {
     private static final int UPLOAD_IMAGE_REQUEST = 1;
     private static final int TAKE_PHOTO_REQUEST = 2;
     private static final int INPUT_CHANGE_INFO = 3;
+    private static final int REQUEST_STORAGE_PERMISSION = 4;
     private Uri photoUri;
     private String res_type = "";
     private Integer id = null;
@@ -130,8 +136,29 @@ public class fragment_mine extends Fragment {
     }
 
     public void uploadPicture(View view) {
-        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(intent, UPLOAD_IMAGE_REQUEST);
+//        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+//        startActivityForResult(intent, UPLOAD_IMAGE_REQUEST);
+        String[] options = {"选择照片", "拍照"};
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("选择图片来源");
+        builder.setItems(options, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case 0: // 从相册选择
+                        Intent pickPhoto = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                        startActivityForResult(pickPhoto, UPLOAD_IMAGE_REQUEST);
+                        break;
+                    case 1: // 使用相机拍照
+                        checkPermission();
+                        Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                        startActivityForResult(takePicture, TAKE_PHOTO_REQUEST);
+                        break;
+                }
+            }
+        });
+        builder.show();
     }
 
     @Override
@@ -153,6 +180,31 @@ public class fragment_mine extends Fragment {
                         Toast.makeText(getContext(), "查找图片文件失败", Toast.LENGTH_SHORT).show();
                     }
                 }
+                break;
+            case TAKE_PHOTO_REQUEST:
+                if (resultCode == RESULT_OK) {
+                    // 获取图片
+                    if (data != null && data.getExtras() != null) {
+                        Bundle bundle = data.getExtras();
+                        // 转换图片的二进制流
+                        Bitmap bitmap = (Bitmap) bundle.get("data");
+                        if (bitmap != null) {
+                            // 设置图片
+                            image_avatar.setImageBitmap(bitmap);
+                            saveImageToAppDirectory(bitmap, (Integer.toString(id)+"avatar.png"));
+                            changeAvatar(Integer.toString(id)+"avatar.png");
+                            Log.d(TAG, "success");
+                        } else {
+                            Log.d(TAG, "Bitmap is null");
+                        }
+                    } else {
+                        Log.d(TAG, "Intent data or extras is null");
+                    }
+
+                } else {
+                    Log.d(TAG, "Result code is not OK");
+                }
+
                 break;
             case INPUT_CHANGE_INFO:
                 onResume();
@@ -261,10 +313,33 @@ public class fragment_mine extends Fragment {
         });
     }
 
+    private void checkPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            String[] permissions = new String[]{Manifest.permission.CAMERA};
+            for (String permission : permissions) {
+                if (ContextCompat.checkSelfPermission(getActivity(), permission) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(getActivity(), permissions, REQUEST_STORAGE_PERMISSION);
+                    return;
+                }
+            }
+        }
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[]
             grantResults) {
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && requestCode == REQUEST_STORAGE_PERMISSION) {
+            for (int i = 0; i < permissions.length; i++) {
+                if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                    Intent intent = new Intent();
+                    intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                    Uri uri = Uri.fromParts("package", getActivity().getPackageName(), null);
+                    intent.setData(uri);
+                    startActivityForResult(intent, REQUEST_STORAGE_PERMISSION);
+                    return;
+                }
+            }
+        }
     }
     private void saveImageToAppDirectory(Bitmap bitmap, String fileName) {
         File externalFilesDir = getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);

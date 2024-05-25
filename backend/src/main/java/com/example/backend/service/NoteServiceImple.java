@@ -1,18 +1,33 @@
 package com.example.backend.service;
 
+import com.example.backend.dao.NoteDao;
+import com.example.backend.dao.UserDao;
 import com.example.backend.entity.Note;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class NoteServiceImple implements NoteService{
+    @Autowired
+    private NoteDao noteDao;
 
-    public int insert(Note note){
-        return 0;
-    }
+    @Override
+    public int insert(Note note){ return noteDao.insert(note); }
 
-    public List<Note> getById(Integer id){
-        return null;
-    }
+    @Override
+    public int getNoteId() { return noteDao.getNoteID();}
+
+    @Override
+    public Note getByNoteId(Integer noteID){ return noteDao.getByNoteId(noteID); }
+
+    @Override
+    public List<Note> getByUserId(Integer id) { return noteDao.getByUserId(id); }
+
+    @Override
+    public List<Note> getByKey(Integer id, String key) { return noteDao.getByKey(id, key); }
+
+    @Override
+    public List<Note> getByTag(Integer id, String tag) { return noteDao.getByTag(id, tag); }
 }

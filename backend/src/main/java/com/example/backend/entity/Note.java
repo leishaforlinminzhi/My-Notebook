@@ -3,6 +3,8 @@ package com.example.backend.entity;
 public class Note {
     private int id;
 
+    private int noteID;
+
     private String title;
 
     private String text;
@@ -16,6 +18,10 @@ public class Note {
     public int getId(){ return this.id; }
 
     public void setId(int id){ this.id = id; }
+
+    public int getNoteID(){ return this.noteID; }
+
+    public void setNoteID(int noteID){ this.noteID = noteID; }
 
     public String getTitle(){ return this.title; }
 
@@ -42,6 +48,7 @@ public class Note {
     public String toString() {
         return "Record{" +
                 "id=" + id +
+                ", noteID='" + noteID + '\'' +
                 ", title='" + title + '\'' +
                 ", text='" + text + '\'' +
                 ", tags='" + tags + '\'' +

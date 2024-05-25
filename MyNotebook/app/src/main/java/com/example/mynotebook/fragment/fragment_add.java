@@ -6,6 +6,7 @@ import static android.content.ContentValues.TAG;
 import static androidx.core.content.ContextCompat.getSystemService;
 import static com.google.android.material.internal.ViewUtils.hideKeyboard;
 import static java.lang.System.in;
+import static java.lang.Thread.sleep;
 
 import android.Manifest;
 import android.content.Context;
@@ -39,15 +40,23 @@ import androidx.fragment.app.Fragment;
 
 import com.example.mynotebook.GlobalValue;
 import com.example.mynotebook.R;
+import com.example.mynotebook.RegisterActivity;
+import com.example.mynotebook.utils.HttpPostRequest;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipDrawable;
 import com.google.android.material.chip.ChipGroup;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
 import androidx.core.content.ContextCompat;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class fragment_add extends Fragment {
     private Integer id = null;
@@ -66,6 +75,8 @@ public class fragment_add extends Fragment {
     private MediaRecorder recorder;
     private String fileName = null;
     private boolean voiceRecording = false;
+    private String res_type = "";
+    private Integer noteID = 0;
 
     @Nullable
     @Override
@@ -144,12 +155,19 @@ public class fragment_add extends Fragment {
             public void onClick(View v) {
                 // TODO:将事件发送给后端
 
+                int noteID = getNoteID();
+
                 // 标题信息
                 String title = null;
                 title = input_title.getText().toString();
                 if (title.length() == 0){
                     Toast.makeText(getActivity(), "请输入标题", Toast.LENGTH_SHORT).show();
                     return;
+                }
+                try {
+                    title = URLEncoder.encode(title, "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException(e);
                 }
 
                 // 正文信息
@@ -159,11 +177,25 @@ public class fragment_add extends Fragment {
                     Toast.makeText(getActivity(), "请输入正文", Toast.LENGTH_SHORT).show();
                     return;
                 }
+                try {
+                    text = URLEncoder.encode(text, "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException(e);
+                }
+
                 // 图片
+                String images = null;
+                try {
+                    images = URLEncoder.encode(selectedPhotos.toString().toString(), "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException(e);
+                }
 
                 // 语音
+                String voice = null;
 
                 // tag 信息
+                String tags = null;
                 ArrayList<String> selectedChipTexts = new ArrayList<>();
                 for (int i = 0; i < chipGroup.getChildCount(); i++) {
                     View view = chipGroup.getChildAt(i);
@@ -176,10 +208,18 @@ public class fragment_add extends Fragment {
                         }
                     }
                 }
+                try {
+                    tags = URLEncoder.encode(selectedChipTexts.toString(), "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException(e);
+                }
+
                 Log.d(TAG, title);
                 Log.d(TAG, text);
                 Log.d(TAG, selectedPhotos.toString());
                 Log.d(TAG, selectedChipTexts.toString());
+
+                sendNote(id, noteID, title, text, images, tags, voice);
 
             }
         });
@@ -218,6 +258,85 @@ public class fragment_add extends Fragment {
         });
 
         return view;
+    }
+
+    private int getNoteID(){
+        res_type = "";
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String url_path = "/note/getNoteID";
+                String[][] requestHead = new String[0][2];
+                Object[][] requestBody = new Object[2][2];
+                HttpPostRequest request = new HttpPostRequest();
+                try {
+                    Object[] res = request.sendPostRequest(url_path, requestHead, requestBody);
+                    res_type = (String) res[0];
+                    Log.d(TAG, res[1].toString());
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException(e);
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+        thread.start();
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        switch (res_type){
+            case "Success":
+                return noteID + 1;
+            case "ConnectException":
+                Toast.makeText(getActivity(), "服务器连接失败", Toast.LENGTH_SHORT).show();
+                break;
+            default:
+                Toast.makeText(getActivity(), "未知错误", Toast.LENGTH_SHORT).show();
+                break;
+        }
+        return -1;
+    }
+    private void sendNote(Integer id, Integer noteID, String title, String text, String images, String tags, String voice){
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String url_path = "/note/save";
+                String[][] requestHead = new String[0][2];
+                Object[][] requestBody = new Object[2][2];
+                HttpPostRequest request = new HttpPostRequest();
+                try {
+                    Object[] res = request.sendPostRequest(url_path+"?id="+id+"&noteID="+noteID+"&title="+title+"&text="+text+"&images="+images+"&tags="+tags+"&voice="+voice, requestHead, requestBody);
+                    res_type = (String) res[0];
+                    JSONObject jsonObject = new JSONObject(res[1].toString());
+                    Log.d(TAG, jsonObject.toString());
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException(e);
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException(e);
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+        thread.start();
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        switch (res_type){
+            case "Success":
+                Toast.makeText(getActivity(), "上传成功", Toast.LENGTH_SHORT).show();
+                break;
+            case "ConnectException":
+                Toast.makeText(getActivity(), "服务器连接失败", Toast.LENGTH_SHORT).show();
+                break;
+            default:
+                Toast.makeText(getActivity(), "未知错误", Toast.LENGTH_SHORT).show();
+                break;
+        }
     }
 
     @Override
