@@ -12,6 +12,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
@@ -71,11 +73,12 @@ public class fragment_add extends Fragment {
     private Button btn_addtag;
     private Button btn_ok;
     private ChipGroup chipGroup;
-    private List<Uri> selectedPhotos;
-    private com.example.mynotebook.fragment.PhotoAdapter photoAdapter;
+    private List<Bitmap> selectedPhotos;
+    private String voicePath;
+    private com.example.mynotebook.tools.PhotoAdapter photoAdapter;
     private MediaRecorder recorder;
     private String fileName = null;
-    private boolean voiceRecording = false;
+    private Integer voiceRecording = 0;
     private String res_type = "";
     private Integer noteID = 0;
 
@@ -99,7 +102,7 @@ public class fragment_add extends Fragment {
         chipGroup = view.findViewById(R.id.chipGroup);
 
         selectedPhotos = new ArrayList<>();
-        photoAdapter = new com.example.mynotebook.fragment.PhotoAdapter(requireContext(), selectedPhotos);
+        photoAdapter = new com.example.mynotebook.tools.PhotoAdapter(requireContext(), selectedPhotos);
         gridViewPhotos.setAdapter(photoAdapter);
 
         gridViewPhotos.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -153,23 +156,67 @@ public class fragment_add extends Fragment {
         btn_addvoice.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    if(!voiceRecording) {
+                switch (voiceRecording){
+                    case 0:
                         checkPermission();
 
-                        // TODO:录音
+                        noteID = getNoteID();
+                        File externalFilesDir = getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                        File directory = new File(externalFilesDir, "voice/"+Integer.toString(noteID)+"/");
+                        if (!directory.exists()) {
+                            directory.mkdirs();
+                        }
+                        voicePath = externalFilesDir.getAbsolutePath() + "/voice/"+Integer.toString(noteID)+"/voice.3gp";
 
-                        Toast.makeText(getActivity(), "Recording started", Toast.LENGTH_SHORT).show();
+                        if (recorder == null) {
+                            recorder = new MediaRecorder();
+                            recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+                            recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+                            recorder.setOutputFile(voicePath);
+                            recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+                            try {
+                                recorder.prepare();
+                                recorder.start();
+                            } catch (IOException e) {
+                                Log.e("AudioPlayback", "Failed to play recording", e);
+                                Toast.makeText(getActivity(), "麦克风开启失败", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(getActivity(), "麦克风出现异常", Toast.LENGTH_SHORT).show();
+                        }
+                        Toast.makeText(getActivity(), "开始录音", Toast.LENGTH_SHORT).show();
                         btn_addvoice.setText("停止录音");
-                        voiceRecording = true;
-                    }else{
+                        voiceRecording = 1;
+                        break;
+                    case 1:
                         if (recorder != null) {
                             recorder.stop();
                             recorder.release();
                             recorder = null;
-                            Toast.makeText(getActivity(), "Recording stopped", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity(), "结束录音", Toast.LENGTH_SHORT).show();
                         }
-                        btn_addvoice.setText("已添加录音");
-                    }
+                        btn_addvoice.setText("已添语音");
+                        voiceRecording = 2;
+                        break;
+                    case 2:
+                        MediaPlayer mediaPlayer = new MediaPlayer();
+                        try {
+                            Toast.makeText(getActivity(), "录音试听中", Toast.LENGTH_SHORT).show();
+                            mediaPlayer.setDataSource(voicePath);
+                            mediaPlayer.prepare();
+                            mediaPlayer.start();
+                            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                @Override
+                                public void onCompletion(MediaPlayer mediaPlayer) {
+                                    // 播放完成后的操作
+                                    mediaPlayer.release();
+                                }
+                            });
+                        } catch (IOException e) {
+                            Log.e("AudioPlayback", "Failed to play recording", e);
+                        }
+                        break;
+                }
             }
         });
 
@@ -216,6 +263,10 @@ public class fragment_add extends Fragment {
 
                 // 语音
                 String voice = null;
+                if(voiceRecording == 2){
+                    File externalFilesDir = getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                    voice = "voice/"+Integer.toString(noteID)+"/voice.3gp";
+                }
 
                 // tag 信息
                 String tags = null;
@@ -254,6 +305,9 @@ public class fragment_add extends Fragment {
                 input_title.setText("");
                 selectedPhotos.clear();
                 photoAdapter.notifyDataSetChanged();
+                voiceRecording = 0;
+                btn_addvoice.setText("开始录音");
+
 
                 sendNote(id, noteID, title, text, images, tags, voice);
 
@@ -380,14 +434,9 @@ public class fragment_add extends Fragment {
     private List<String> saveImages(Integer noteID){
         List<String> images = new ArrayList<>();;
         for (int i = 0; i < selectedPhotos.size(); i++) {
-            try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), selectedPhotos.get(i));
-                String filename = "img/"+Integer.toString(noteID)+"/"+Integer.toString(i)+".png";
-                saveImageToAppDirectory(noteID, bitmap, filename);
-                images.add(filename);
-            } catch (IOException e) {
-                Toast.makeText(getContext(), "查找图片文件失败", Toast.LENGTH_SHORT).show();
-            }
+            String filename = "img/"+Integer.toString(noteID)+"/"+Integer.toString(i)+".png";
+            saveImageToAppDirectory(noteID, selectedPhotos.get(i), filename);
+            images.add(filename);
         }
         return images;
     }
@@ -419,14 +468,25 @@ public class fragment_add extends Fragment {
                         if (data.getData() != null) {
                             // 单张照片
                             Uri selectedPhoto = data.getData();
-                            selectedPhotos.add(selectedPhoto);
+                            try {
+                                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), selectedPhoto);
+                                selectedPhotos.add(bitmap);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+
                             Log.d(TAG, selectedPhoto.toString());
                         } else if (data.getClipData() != null) {
                             // 多张照片
                             int count = data.getClipData().getItemCount();
                             for (int i = 0; i < count; i++) {
                                 Uri selectedPhoto = data.getClipData().getItemAt(i).getUri();
-                                selectedPhotos.add(selectedPhoto);
+                                try {
+                                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), selectedPhoto);
+                                    selectedPhotos.add(bitmap);
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
                                 Log.d(TAG, selectedPhoto.toString());
                             }
                         }
@@ -443,6 +503,7 @@ public class fragment_add extends Fragment {
                         Bitmap bitmap = (Bitmap) bundle.get("data");
                         if (bitmap != null) {
                             // 设置图片
+                            selectedPhotos.add(bitmap);
                             photoAdapter.notifyDataSetChanged();
                         } else {
                             Log.d(TAG, "Bitmap is null");
@@ -461,26 +522,6 @@ public class fragment_add extends Fragment {
             default:
                 break;
         }
-//        if (requestCode == REQUEST_CODE_SELECT_PHOTOS && resultCode == getActivity().RESULT_OK) {
-//            // 处理选择的照片
-//            if (data != null) {
-//                if (data.getData() != null) {
-//                    // 单张照片
-//                    Uri selectedPhoto = data.getData();
-//                    selectedPhotos.add(selectedPhoto);
-//                    Log.d(TAG, selectedPhoto.toString());
-//                } else if (data.getClipData() != null) {
-//                    // 多张照片
-//                    int count = data.getClipData().getItemCount();
-//                    for (int i = 0; i < count; i++) {
-//                        Uri selectedPhoto = data.getClipData().getItemAt(i).getUri();
-//                        selectedPhotos.add(selectedPhoto);
-//                        Log.d(TAG, selectedPhoto.toString());
-//                    }
-//                }
-//                photoAdapter.notifyDataSetChanged();
-//            }
-//        }else if(resultCode == RESULT_OK && requestCode == REQUEST_PERMISSION) checkPermission();
     }
 
     private void checkPermission() {

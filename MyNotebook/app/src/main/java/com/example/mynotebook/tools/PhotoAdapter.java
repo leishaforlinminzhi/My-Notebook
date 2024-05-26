@@ -1,4 +1,4 @@
-package com.example.mynotebook.fragment;
+package com.example.mynotebook.tools;
 
 import static android.content.ContentValues.TAG;
 
@@ -21,9 +21,9 @@ import java.util.List;
 
 public class PhotoAdapter extends BaseAdapter {
     private Context context;
-    private List<Uri> photos;
+    private List<Bitmap> photos;
 
-    public PhotoAdapter(Context context, List<Uri> photos) {
+    public PhotoAdapter(Context context, List<Bitmap> photos) {
         this.context = context;
         this.photos = photos;
     }
@@ -56,18 +56,9 @@ public class PhotoAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        Uri photoUri = photos.get(position);
-        Log.d(TAG, photoUri.toString());
+        Bitmap photoUri = photos.get(position);
 
-        // 加载图片
-        try {
-            InputStream inputStream = context.getContentResolver().openInputStream(photoUri);
-            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-            holder.imageViewPhoto.setImageBitmap(bitmap);
-            inputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        holder.imageViewPhoto.setImageBitmap(photoUri);
 
         return convertView;
     }

@@ -83,11 +83,41 @@ public class NoteDaoImple implements NoteDao{
 
     @Override
     public List<Note> getByKey(Integer id, String key) {
-        return List.of();
+        String sql = "SELECT * FROM Notes WHERE id = ? AND (title LIKE ? OR text LIKE ?)";
+        String likePattern = "%" + key + "%";
+        return jdbcTemplate.query(sql, new Object[]{id, likePattern, likePattern}, new RowMapper<Note>() {
+            @Override
+            public Note mapRow(ResultSet resultSet, int i) throws SQLException {
+                Note note = new Note();
+                note.setId(resultSet.getInt("id"));
+                note.setNoteID(resultSet.getInt("noteID"));
+                note.setTitle(resultSet.getString("title"));
+                note.setText(resultSet.getString("text"));
+                note.setImages(resultSet.getString("images"));
+                note.setTags(resultSet.getString("tags"));
+                note.setVoice(resultSet.getString("voice"));
+                return note;
+            }
+        });
     }
 
     @Override
     public List<Note> getByTag(Integer id, String tag) {
-        return List.of();
+        String sql = "SELECT * FROM Notes WHERE id = ? AND (tags LIKE ?)";
+        String likePattern = "%" + tag + "%";
+        return jdbcTemplate.query(sql, new Object[]{id, likePattern, likePattern}, new RowMapper<Note>() {
+            @Override
+            public Note mapRow(ResultSet resultSet, int i) throws SQLException {
+                Note note = new Note();
+                note.setId(resultSet.getInt("id"));
+                note.setNoteID(resultSet.getInt("noteID"));
+                note.setTitle(resultSet.getString("title"));
+                note.setText(resultSet.getString("text"));
+                note.setImages(resultSet.getString("images"));
+                note.setTags(resultSet.getString("tags"));
+                note.setVoice(resultSet.getString("voice"));
+                return note;
+            }
+        });
     }
 }
