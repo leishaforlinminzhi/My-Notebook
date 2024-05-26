@@ -3,15 +3,15 @@ package com.example.mynotebook.fragment;
 import static android.app.Activity.RESULT_OK;
 import static android.content.ContentValues.TAG;
 
-import static androidx.core.content.ContextCompat.getSystemService;
 import static com.google.android.material.internal.ViewUtils.hideKeyboard;
-import static java.lang.System.in;
 import static java.lang.Thread.sleep;
 
 import android.Manifest;
-import android.content.Context;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
@@ -25,7 +25,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -40,12 +39,12 @@ import androidx.fragment.app.Fragment;
 
 import com.example.mynotebook.GlobalValue;
 import com.example.mynotebook.R;
-import com.example.mynotebook.RegisterActivity;
 import com.example.mynotebook.utils.HttpPostRequest;
 import com.google.android.material.chip.Chip;
-import com.google.android.material.chip.ChipDrawable;
 import com.google.android.material.chip.ChipGroup;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -60,7 +59,9 @@ import org.json.JSONObject;
 
 public class fragment_add extends Fragment {
     private Integer id = null;
-    private static final int REQUEST_CODE_SELECT_PHOTOS = 1;
+    private static final int UPLOAD_IMAGE_REQUEST = 1;
+    private static final int TAKE_PHOTO_REQUEST = 2;
+    private static final int REQUEST_PERMISSION = 3;
     private EditText input_title;
     private EditText input_text;
     private EditText input_tag ;
@@ -113,9 +114,31 @@ public class fragment_add extends Fragment {
             @Override
             public void onClick(View v) {
                 // 启动相册选择照片
-                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                startActivityForResult(intent, REQUEST_CODE_SELECT_PHOTOS);
+//                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+//                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+//                startActivityForResult(intent, UPLOAD_IMAGE_REQUEST);
+                String[] options = {"选择照片", "拍照"};
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setTitle("选择图片来源");
+                builder.setItems(options, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which) {
+                            case 0: // 从相册选择
+                                Intent pickPhoto = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                                pickPhoto.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                                startActivityForResult(pickPhoto, UPLOAD_IMAGE_REQUEST);
+                                break;
+                            case 1: // 使用相机拍照
+                                checkPermission();
+                                Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                                startActivityForResult(takePicture, TAKE_PHOTO_REQUEST);
+                                break;
+                        }
+                    }
+                });
+                builder.show();
             }
         });
 
@@ -160,7 +183,7 @@ public class fragment_add extends Fragment {
                 // 标题信息
                 String title = null;
                 title = input_title.getText().toString();
-                if (title.length() == 0){
+                if (title.length() == 0) {
                     Toast.makeText(getActivity(), "请输入标题", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -173,7 +196,7 @@ public class fragment_add extends Fragment {
                 // 正文信息
                 String text = null;
                 text = input_text.getText().toString();
-                if (text.length() == 0){
+                if (text.length() == 0) {
                     Toast.makeText(getActivity(), "请输入正文", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -186,7 +209,7 @@ public class fragment_add extends Fragment {
                 // 图片
                 String images = null;
                 try {
-                    images = URLEncoder.encode(selectedPhotos.toString().toString(), "UTF-8");
+                    images = URLEncoder.encode(selectedPhotos.toString(), "UTF-8");
                 } catch (UnsupportedEncodingException e) {
                     throw new RuntimeException(e);
                 }
@@ -218,6 +241,19 @@ public class fragment_add extends Fragment {
                 Log.d(TAG, text);
                 Log.d(TAG, selectedPhotos.toString());
                 Log.d(TAG, selectedChipTexts.toString());
+
+                // 都没问题之后再保存
+                if (selectedPhotos.size() > 0) {
+                    try {
+                        images = URLEncoder.encode(saveImages(noteID).toString(), "UTF-8");
+                    } catch (UnsupportedEncodingException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                input_text.setText("");
+                input_title.setText("");
+                selectedPhotos.clear();
+                photoAdapter.notifyDataSetChanged();
 
                 sendNote(id, noteID, title, text, images, tags, voice);
 
@@ -273,6 +309,8 @@ public class fragment_add extends Fragment {
                     Object[] res = request.sendPostRequest(url_path, requestHead, requestBody);
                     res_type = (String) res[0];
                     Log.d(TAG, res[1].toString());
+                    noteID = Integer.parseInt(res[1].toString().trim()) + 1;
+                    Log.d(TAG, noteID.toString());
                 } catch (UnsupportedEncodingException e) {
                     throw new RuntimeException(e);
                 } catch (MalformedURLException e) {
@@ -288,7 +326,7 @@ public class fragment_add extends Fragment {
         }
         switch (res_type){
             case "Success":
-                return noteID + 1;
+                return noteID;
             case "ConnectException":
                 Toast.makeText(getActivity(), "服务器连接失败", Toast.LENGTH_SHORT).show();
                 break;
@@ -339,29 +377,110 @@ public class fragment_add extends Fragment {
         }
     }
 
+    private List<String> saveImages(Integer noteID){
+        List<String> images = new ArrayList<>();;
+        for (int i = 0; i < selectedPhotos.size(); i++) {
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), selectedPhotos.get(i));
+                String filename = "img/"+Integer.toString(noteID)+"/"+Integer.toString(i)+".png";
+                saveImageToAppDirectory(noteID, bitmap, filename);
+                images.add(filename);
+            } catch (IOException e) {
+                Toast.makeText(getContext(), "查找图片文件失败", Toast.LENGTH_SHORT).show();
+            }
+        }
+        return images;
+    }
+    private void saveImageToAppDirectory(Integer noteID, Bitmap bitmap, String fileName) {
+        File externalFilesDir = getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File directory = new File(externalFilesDir, "img/"+Integer.toString(noteID)+"/");
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+
+        if (externalFilesDir != null) {
+            File imageFile = new File(externalFilesDir, fileName);
+            try (FileOutputStream fos = new FileOutputStream(imageFile)) {
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                fos.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_SELECT_PHOTOS && resultCode == getActivity().RESULT_OK) {
-            // 处理选择的照片
-            if (data != null) {
-                if (data.getData() != null) {
-                    // 单张照片
-                    Uri selectedPhoto = data.getData();
-                    selectedPhotos.add(selectedPhoto);
-                    Log.d(TAG, selectedPhoto.toString());
-                } else if (data.getClipData() != null) {
-                    // 多张照片
-                    int count = data.getClipData().getItemCount();
-                    for (int i = 0; i < count; i++) {
-                        Uri selectedPhoto = data.getClipData().getItemAt(i).getUri();
-                        selectedPhotos.add(selectedPhoto);
-                        Log.d(TAG, selectedPhoto.toString());
+        switch (requestCode){
+            case UPLOAD_IMAGE_REQUEST:
+                if (resultCode == getActivity().RESULT_OK) {
+                    // 处理选择的照片
+                    if (data != null) {
+                        if (data.getData() != null) {
+                            // 单张照片
+                            Uri selectedPhoto = data.getData();
+                            selectedPhotos.add(selectedPhoto);
+                            Log.d(TAG, selectedPhoto.toString());
+                        } else if (data.getClipData() != null) {
+                            // 多张照片
+                            int count = data.getClipData().getItemCount();
+                            for (int i = 0; i < count; i++) {
+                                Uri selectedPhoto = data.getClipData().getItemAt(i).getUri();
+                                selectedPhotos.add(selectedPhoto);
+                                Log.d(TAG, selectedPhoto.toString());
+                            }
+                        }
+                        photoAdapter.notifyDataSetChanged();
                     }
                 }
-                photoAdapter.notifyDataSetChanged();
-            }
-        }else if(resultCode == RESULT_OK && requestCode == 200) checkPermission();
+                break;
+            case TAKE_PHOTO_REQUEST:
+                if (resultCode == RESULT_OK) {
+                    // 获取图片
+                    if (data != null && data.getExtras() != null) {
+                        Bundle bundle = data.getExtras();
+                        // 转换图片的二进制流
+                        Bitmap bitmap = (Bitmap) bundle.get("data");
+                        if (bitmap != null) {
+                            // 设置图片
+                            photoAdapter.notifyDataSetChanged();
+                        } else {
+                            Log.d(TAG, "Bitmap is null");
+                        }
+                    } else {
+                        Log.d(TAG, "Intent data or extras is null");
+                    }
+
+                } else {
+                    Log.d(TAG, "Result code is not OK");
+                }
+                break;
+            case REQUEST_PERMISSION:
+                if(resultCode == RESULT_OK) checkPermission();
+                break;
+            default:
+                break;
+        }
+//        if (requestCode == REQUEST_CODE_SELECT_PHOTOS && resultCode == getActivity().RESULT_OK) {
+//            // 处理选择的照片
+//            if (data != null) {
+//                if (data.getData() != null) {
+//                    // 单张照片
+//                    Uri selectedPhoto = data.getData();
+//                    selectedPhotos.add(selectedPhoto);
+//                    Log.d(TAG, selectedPhoto.toString());
+//                } else if (data.getClipData() != null) {
+//                    // 多张照片
+//                    int count = data.getClipData().getItemCount();
+//                    for (int i = 0; i < count; i++) {
+//                        Uri selectedPhoto = data.getClipData().getItemAt(i).getUri();
+//                        selectedPhotos.add(selectedPhoto);
+//                        Log.d(TAG, selectedPhoto.toString());
+//                    }
+//                }
+//                photoAdapter.notifyDataSetChanged();
+//            }
+//        }else if(resultCode == RESULT_OK && requestCode == REQUEST_PERMISSION) checkPermission();
     }
 
     private void checkPermission() {
@@ -369,7 +488,7 @@ public class fragment_add extends Fragment {
             String[] permissions = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE};
             for (String permission : permissions) {
                 if (ContextCompat.checkSelfPermission(getActivity(), permission) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(getActivity(), permissions, 200);
+                    ActivityCompat.requestPermissions(getActivity(), permissions, REQUEST_PERMISSION);
                     return;
                 }
             }
@@ -380,14 +499,14 @@ public class fragment_add extends Fragment {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[]
             grantResults) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && requestCode == 200) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && requestCode == REQUEST_PERMISSION) {
             for (int i = 0; i < permissions.length; i++) {
                 if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
                     Intent intent = new Intent();
                     intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                     Uri uri = Uri.fromParts("package", getActivity().getPackageName(), null);
                     intent.setData(uri);
-                    startActivityForResult(intent, 200);
+                    startActivityForResult(intent, REQUEST_PERMISSION);
                     return;
                 }
             }

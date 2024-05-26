@@ -61,7 +61,7 @@ public class fragment_mine extends Fragment {
     private static final int UPLOAD_IMAGE_REQUEST = 1;
     private static final int TAKE_PHOTO_REQUEST = 2;
     private static final int INPUT_CHANGE_INFO = 3;
-    private static final int REQUEST_STORAGE_PERMISSION = 4;
+    private static final int REQUEST_PERMISSION = 4;
     private Uri photoUri;
     private String res_type = "";
     private Integer id = null;
@@ -318,24 +318,25 @@ public class fragment_mine extends Fragment {
             String[] permissions = new String[]{Manifest.permission.CAMERA};
             for (String permission : permissions) {
                 if (ContextCompat.checkSelfPermission(getActivity(), permission) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(getActivity(), permissions, REQUEST_STORAGE_PERMISSION);
+                    ActivityCompat.requestPermissions(getActivity(), permissions, REQUEST_PERMISSION);
                     return;
                 }
             }
         }
     }
 
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[]
             grantResults) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && requestCode == REQUEST_STORAGE_PERMISSION) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && requestCode == REQUEST_PERMISSION) {
             for (int i = 0; i < permissions.length; i++) {
                 if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
                     Intent intent = new Intent();
                     intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                     Uri uri = Uri.fromParts("package", getActivity().getPackageName(), null);
                     intent.setData(uri);
-                    startActivityForResult(intent, REQUEST_STORAGE_PERMISSION);
+                    startActivityForResult(intent, REQUEST_PERMISSION);
                     return;
                 }
             }
