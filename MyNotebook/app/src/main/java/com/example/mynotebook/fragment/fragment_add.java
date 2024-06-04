@@ -24,6 +24,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -31,11 +32,13 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
@@ -73,6 +76,10 @@ public class fragment_add extends Fragment {
     private Button btn_addtag;
     private Button btn_ok;
     private ChipGroup chipGroup;
+    private ConstraintLayout rootLayout;
+    private ConstraintLayout Layout1;
+    private ConstraintLayout Layout2;
+    private ConstraintLayout Layout3;
     private List<Bitmap> selectedPhotos;
     private String voicePath;
     private com.example.mynotebook.tools.PhotoAdapter photoAdapter;
@@ -81,6 +88,7 @@ public class fragment_add extends Fragment {
     private Integer voiceRecording = 0;
     private String res_type = "";
     private Integer noteID = 0;
+    private Integer addNote = 1;
 
     @Nullable
     @Override
@@ -104,6 +112,11 @@ public class fragment_add extends Fragment {
         selectedPhotos = new ArrayList<>();
         photoAdapter = new com.example.mynotebook.tools.PhotoAdapter(requireContext(), selectedPhotos);
         gridViewPhotos.setAdapter(photoAdapter);
+
+        rootLayout = view.findViewById(R.id.constraintLayout);
+        Layout1 = view.findViewById(R.id.constraintLayout1);
+        Layout2 = view.findViewById(R.id.constraintLayout2);
+        Layout3 = view.findViewById(R.id.constraintLayout3);
 
         gridViewPhotos.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -150,6 +163,7 @@ public class fragment_add extends Fragment {
             public void onClick(View v) {
                 input_tag.setVisibility(View.VISIBLE);
                 input_tag.requestFocus();
+                addNote = 1;
             }
         });
 
@@ -178,7 +192,6 @@ public class fragment_add extends Fragment {
                                 recorder.prepare();
                                 recorder.start();
                             } catch (IOException e) {
-                                Log.e("AudioPlayback", "Failed to play recording", e);
                                 Toast.makeText(getActivity(), "麦克风开启失败", Toast.LENGTH_SHORT).show();
                             }
                         } else {
@@ -202,6 +215,12 @@ public class fragment_add extends Fragment {
                         MediaPlayer mediaPlayer = new MediaPlayer();
                         try {
                             Toast.makeText(getActivity(), "录音试听中", Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, voicePath);
+                            File file = new File(voicePath);
+                            if (!file.exists()) {
+                                Toast.makeText(getActivity(), "文件丢失", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
                             mediaPlayer.setDataSource(voicePath);
                             mediaPlayer.prepare();
                             mediaPlayer.start();
@@ -213,7 +232,7 @@ public class fragment_add extends Fragment {
                                 }
                             });
                         } catch (IOException e) {
-                            Log.e("AudioPlayback", "Failed to play recording", e);
+                            Toast.makeText(getActivity(), "试听失败", Toast.LENGTH_SHORT).show();
                         }
                         break;
                 }
@@ -315,39 +334,134 @@ public class fragment_add extends Fragment {
         });
 
         input_tag.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        input_tag.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(input_tag.getVisibility() == View.VISIBLE) {
+                    addChip();
+                }
+            }
+        });
         input_tag.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                Log.d(TAG, "here");
-                String chipText = input_tag.getText().toString();
-                Chip chip = new Chip(requireContext());
-                chip.setText(chipText);
-                chip.setCheckable(true);
-                chip.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Chip chip = (Chip) v;
-                        if (chip.isChecked()) {
-                            // 如果Chip被选中，则执行相应的逻辑
-//                            selectedChipTexts.add(chip.getText().toString());
-                            Log.d(TAG, "Chip selected: " + chip.getText().toString());
-                        } else {
-                            // 如果Chip被取消选中，则执行相应的逻辑
-//                            selectedChipTexts.remove(chip.getText().toString());
-                            Log.d(TAG, "Chip deselected: " + chip.getText().toString());
-                        }
-                    }
-                });
-
-                chipGroup.addView(chip);
-                input_tag.setText("");
-                input_tag.setVisibility(View.INVISIBLE);
-
+                addChip();
                 return true;
             }
         });
-
+        rootLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    // 判断触摸点是否在 EditText 之外
+                    Log.d(TAG, "tip");
+                    if (isTouchOutsideView(input_tag, event)) {
+                        Log.d(TAG, "here");
+                        addChip();
+                    }
+                }
+                return true;
+            }
+        });
+        Layout1.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    // 判断触摸点是否在 EditText 之外
+                    Log.d(TAG, "tip");
+                    if (isTouchOutsideView(input_tag, event)) {
+                        Log.d(TAG, "here");
+                        addChip();
+                    }
+                }
+                return true;
+            }
+        });
+        Layout2.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    // 判断触摸点是否在 EditText 之外
+                    Log.d(TAG, "tip");
+                    if (isTouchOutsideView(input_tag, event)) {
+                        Log.d(TAG, "here");
+                        addChip();
+                    }
+                }
+                return true;
+            }
+        });
+        Layout3.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    // 判断触摸点是否在 EditText 之外
+                    Log.d(TAG, "tip");
+                    if (isTouchOutsideView(input_tag, event)) {
+                        Log.d(TAG, "here");
+                        addChip();
+                    }
+                }
+                return true;
+            }
+        });
+        chipGroup.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    // 判断触摸点是否在 EditText 之外
+                    Log.d(TAG, "tip");
+                    if (isTouchOutsideView(input_tag, event)) {
+                        Log.d(TAG, "here");
+                        addChip();
+                    }
+                }
+                return true;
+            }
+        });
         return view;
+    }
+
+    private boolean isTouchOutsideView(View view, MotionEvent event) {
+        int[] location = new int[2];
+        view.getLocationOnScreen(location);
+        int x = location[0];
+        int y = location[1];
+        int touchX = (int) event.getRawX();
+        int touchY = (int) event.getRawY();
+        return touchX < x || touchX > x + view.getWidth() || touchY < y || touchY > y + view.getHeight();
+    }
+
+    private void addChip(){
+        String chipText = input_tag.getText().toString();
+        if(chipText.length() == 0){
+            if(addNote == 1){
+                addNote = 0;
+            }else{
+                input_tag.setVisibility(View.INVISIBLE);
+            }
+            return;
+        }
+        input_tag.setVisibility(View.INVISIBLE);
+        Chip chip = new Chip(requireContext());
+        chip.setText(chipText);
+        chip.setCheckable(true);
+        chip.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Chip chip = (Chip) v;
+                if (chip.isChecked()) {
+                    // 如果Chip被选中，则执行相应的逻辑
+                    Log.d(TAG, "Chip selected: " + chip.getText().toString());
+                } else {
+                    // 如果Chip被取消选中，则执行相应的逻辑
+                    Log.d(TAG, "Chip deselected: " + chip.getText().toString());
+                }
+            }
+        });
+
+        chipGroup.addView(chip);
+        input_tag.setText("");
     }
 
     private int getNoteID(){
