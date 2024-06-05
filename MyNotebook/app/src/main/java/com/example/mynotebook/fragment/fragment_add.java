@@ -345,7 +345,11 @@ public class fragment_add extends Fragment {
         input_tag.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
+<<<<<<< HEAD
                 if (input_tag.getVisibility() == View.VISIBLE) {
+=======
+                if(input_tag.getVisibility() == View.VISIBLE) {
+>>>>>>> 04735758bcd45f3e19059333bd7c9ffd272cc8fc
                     addChip();
                 }
             }
@@ -440,16 +444,26 @@ public class fragment_add extends Fragment {
         return touchX < x || touchX > x + view.getWidth() || touchY < y || touchY > y + view.getHeight();
     }
 
+<<<<<<< HEAD
     private void addChip() {
         String chipText = input_tag.getText().toString().trim();  // 使用 trim() 去除前后空格
         if (chipText.length() == 0) {
             if (addNote == 1) {
                 addNote = 0;
             } else {
+=======
+    private void addChip(){
+        String chipText = input_tag.getText().toString();
+        if(chipText.length() == 0){
+            if(addNote == 1){
+                addNote = 0;
+            }else{
+>>>>>>> 04735758bcd45f3e19059333bd7c9ffd272cc8fc
                 input_tag.setVisibility(View.INVISIBLE);
             }
             return;
         }
+<<<<<<< HEAD
 
         // 检查是否已经存在相同文本的 Chip
         int chipCount = chipGroup.getChildCount();
@@ -462,6 +476,8 @@ public class fragment_add extends Fragment {
             }
         }
 
+=======
+>>>>>>> 04735758bcd45f3e19059333bd7c9ffd272cc8fc
         input_tag.setVisibility(View.INVISIBLE);
         Chip chip = new Chip(requireContext());
         chip.setText(chipText);
@@ -484,7 +500,10 @@ public class fragment_add extends Fragment {
         input_tag.setText("");
     }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 04735758bcd45f3e19059333bd7c9ffd272cc8fc
     private int getNoteID(){
         res_type = "";
         Thread thread = new Thread(new Runnable() {
