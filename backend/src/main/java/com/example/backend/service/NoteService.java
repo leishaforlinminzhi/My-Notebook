@@ -19,4 +19,8 @@ public interface NoteService {
     List<Note> getByKey(Integer id, String key);
 
     List<Note> getByTag(Integer id, String tag);
+
+    List<Note> getAllNotes();
+
+    int deleteByNoteId(Integer id);
 }

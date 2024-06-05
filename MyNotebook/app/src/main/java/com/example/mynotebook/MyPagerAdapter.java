@@ -13,7 +13,7 @@ import com.example.mynotebook.fragment.fragment_record;
 public class MyPagerAdapter extends FragmentPagerAdapter {
     private static final int NUM_PAGES = 4;
 
-    public MyPagerAdapter(FragmentManager fm) {
+    public MyPagerAdapter(FragmentManager fm, String id) {
         super(fm);
     }
 

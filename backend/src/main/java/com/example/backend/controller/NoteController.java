@@ -36,6 +36,7 @@ public class NoteController {
         return note;
     }
 
+
     @RequestMapping("/getByUserId")
     @ResponseBody
     public List<Note> getByUserId(Integer id) {
@@ -64,5 +65,24 @@ public class NoteController {
         System.out.println(noteService.getNoteId());
         return noteService.getNoteId();
     }
+
+    // 好像用不上
+    @RequestMapping("/getAllNotes")
+    @ResponseBody
+    public List<Note> getAllNotes() {
+        return noteService.getAllNotes();
+    }
+
+    @RequestMapping("/deleteByNoteId")
+    @ResponseBody
+    public String deleteByNoteId(Integer noteID) {
+        int rowsAffected = this.noteService.deleteByNoteId(noteID);
+        if (rowsAffected > 0) {
+            return "Success";
+        } else {
+            return "Failed";
+        }
+    }
+
 }
 

@@ -19,4 +19,8 @@ public interface NoteDao {
     List<Note> getByKey(Integer id, String key);
     /**tag检索**/
     List<Note> getByTag(Integer id, String tag);
+    // 返回所有笔记
+    List<Note> getAllNotes();
+
+    int deleteByNoteId(Integer noteID);
 }

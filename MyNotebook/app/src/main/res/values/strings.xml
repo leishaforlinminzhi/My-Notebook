@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">MyNotebook</string>
+    <string-array name="search_type_array">
+        <item>By Content</item>
+        <item>By Tag</item>
+    </string-array>
 </resources>

@@ -29,7 +29,7 @@ public class NotebookActivity extends AppCompatActivity {
         TabLayout tabLayout = findViewById(R.id.tabLayout);
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
-        MyPagerAdapter adapter = new MyPagerAdapter(getSupportFragmentManager());
+        MyPagerAdapter adapter = new MyPagerAdapter(getSupportFragmentManager(), id);
         viewPager.setAdapter(adapter);
         tabLayout.setupWithViewPager(viewPager);
     }

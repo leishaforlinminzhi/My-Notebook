@@ -64,8 +64,8 @@ public class NoteDaoImple implements NoteDao{
 
     @Override
     public List<Note> getByUserId(Integer id) {
-        String sql = "select * from Users where id = ?";
-        return Collections.singletonList(this.jdbcTemplate.queryForObject(sql, new RowMapper<Note>() {
+        String sql = "SELECT * FROM Notes WHERE id = ?";
+        return this.jdbcTemplate.query(sql, new RowMapper<Note>() {
             @Override
             public Note mapRow(ResultSet resultSet, int i) throws SQLException {
                 Note note = new Note();
@@ -78,8 +78,9 @@ public class NoteDaoImple implements NoteDao{
                 note.setVoice(resultSet.getString("voice"));
                 return note;
             }
-        }, id));
+        }, id);
     }
+
 
     @Override
     public List<Note> getByKey(Integer id, String key) {
@@ -104,8 +105,8 @@ public class NoteDaoImple implements NoteDao{
     @Override
     public List<Note> getByTag(Integer id, String tag) {
         String sql = "SELECT * FROM Notes WHERE id = ? AND (tags LIKE ?)";
-        String likePattern = "%" + tag + "%";
-        return jdbcTemplate.query(sql, new Object[]{id, likePattern, likePattern}, new RowMapper<Note>() {
+        String likePattern = "%[" + tag + "]%";
+        return jdbcTemplate.query(sql, new Object[]{id, likePattern}, new RowMapper<Note>() {
             @Override
             public Note mapRow(ResultSet resultSet, int i) throws SQLException {
                 Note note = new Note();
@@ -120,4 +121,31 @@ public class NoteDaoImple implements NoteDao{
             }
         });
     }
+
+
+    @Override
+    public List<Note> getAllNotes() {
+        String sql = "SELECT * FROM Notes";
+        return jdbcTemplate.query(sql, new RowMapper<Note>() {
+            @Override
+            public Note mapRow(ResultSet resultSet, int i) throws SQLException {
+                Note note = new Note();
+                note.setId(resultSet.getInt("id"));
+                note.setNoteID(resultSet.getInt("noteID"));
+                note.setTitle(resultSet.getString("title"));
+                note.setText(resultSet.getString("text"));
+                note.setImages(resultSet.getString("images"));
+                note.setTags(resultSet.getString("tags"));
+                note.setVoice(resultSet.getString("voice"));
+                return note;
+            }
+        });
+    }
+
+    @Override
+    public int deleteByNoteId(Integer noteID) {
+        String sql = "DELETE FROM Notes WHERE noteID = ?";
+        return this.jdbcTemplate.update(sql, noteID);
+    }
+
 }

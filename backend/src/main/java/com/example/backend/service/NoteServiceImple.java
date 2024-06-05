@@ -30,4 +30,15 @@ public class NoteServiceImple implements NoteService{
 
     @Override
     public List<Note> getByTag(Integer id, String tag) { return noteDao.getByTag(id, tag); }
+
+    @Override
+    public List<Note> getAllNotes() {
+        return noteDao.getAllNotes();
+    }
+
+    @Override
+    public int deleteByNoteId(Integer noteID) {
+        return noteDao.deleteByNoteId(noteID);
+    }
+
 }
