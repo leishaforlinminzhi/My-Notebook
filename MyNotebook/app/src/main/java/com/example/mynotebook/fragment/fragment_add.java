@@ -44,6 +44,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.mynotebook.GlobalValue;
 import com.example.mynotebook.R;
+import com.example.mynotebook.api.YiyanApiService;
 import com.example.mynotebook.utils.HttpPostRequest;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
@@ -61,6 +62,7 @@ import androidx.core.content.ContextCompat;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.example.mynotebook.api.YiyanApiService;
 
 public class fragment_add extends Fragment {
     private Integer id = null;
@@ -248,8 +250,7 @@ public class fragment_add extends Fragment {
                 int noteID = getNoteID();
 
                 // 标题信息
-                String title = null;
-                title = input_title.getText().toString();
+                String title = input_title.getText().toString();
                 if (title.length() == 0) {
                     Toast.makeText(getActivity(), "请输入标题", Toast.LENGTH_SHORT).show();
                     return;
@@ -261,8 +262,7 @@ public class fragment_add extends Fragment {
                 }
 
                 // 正文信息
-                String text = null;
-                text = input_text.getText().toString();
+                String text = input_text.getText().toString();
                 if (text.length() == 0) {
                     Toast.makeText(getActivity(), "请输入正文", Toast.LENGTH_SHORT).show();
                     return;
@@ -274,9 +274,9 @@ public class fragment_add extends Fragment {
                 }
 
                 // 图片
-                String images = null;
+                final String[] images = {null};
                 try {
-                    images = URLEncoder.encode(selectedPhotos.toString(), "UTF-8");
+                    images[0] = URLEncoder.encode(selectedPhotos.toString(), "UTF-8");
                 } catch (UnsupportedEncodingException e) {
                     throw new RuntimeException(e);
                 }
@@ -289,8 +289,7 @@ public class fragment_add extends Fragment {
                 }
 
                 // tag 信息
-                String tags = null;
-                ArrayList<String> selectedChipTexts = new ArrayList<>();
+                final ArrayList<String>[] selectedChipTexts = new ArrayList[]{new ArrayList<>()};
                 for (int i = 0; i < chipGroup.getChildCount(); i++) {
                     View view = chipGroup.getChildAt(i);
                     if (view instanceof Chip) {
@@ -298,48 +297,71 @@ public class fragment_add extends Fragment {
                         // 为每个Chip添加相同的点击监听器函数
                         if (chip.isChecked()) {
                             // 如果Chip被选中，则执行相应的逻辑
-                            selectedChipTexts.add(chip.getText().toString());
+                            selectedChipTexts[0].add(chip.getText().toString());
                         }
                     }
                 }
-                try {
-                    tags = URLEncoder.encode(selectedChipTexts.toString(), "UTF-8");
-                } catch (UnsupportedEncodingException e) {
-                    throw new RuntimeException(e);
-                }
 
-                Log.d(TAG, title);
-                Log.d(TAG, text);
-                Log.d(TAG, selectedPhotos.toString());
-                Log.d(TAG, selectedChipTexts.toString());
+                // 调用文心一言 API 获取自动生成的标签
+                String finalTitle = title;
+                String finalText = text;
+                String finalVoice = voice;
+                YiyanApiService.getTags(text, new YiyanApiService.TagCallback() {
+                    @Override
+                    public void onTagsGenerated(List<String> generatedTags) {
+                        // 添加大模型生成的标签
+                        if (generatedTags.get(0).length() > 0) {
+                            selectedChipTexts[0].addAll(generatedTags);
+                        }
+                        String tags;
+                        // 编码标签信息
+                        try {
+                            tags = URLEncoder.encode(selectedChipTexts[0].toString(), "UTF-8");
+                        } catch (UnsupportedEncodingException e) {
+                            throw new RuntimeException(e);
+                        }
 
-                // 都没问题之后再保存
-                if (selectedPhotos.size() > 0) {
-                    try {
-                        images = URLEncoder.encode(saveImages(noteID).toString(), "UTF-8");
-                    } catch (UnsupportedEncodingException e) {
-                        throw new RuntimeException(e);
+                        Log.d(TAG, finalTitle);
+                        Log.d(TAG, finalText);
+                        Log.d(TAG, selectedPhotos.toString());
+                        Log.d(TAG, selectedChipTexts[0].toString());
+
+                        // 都没问题之后再保存
+                        if (selectedPhotos.size() > 0) {
+                            try {
+                                images[0] = URLEncoder.encode(saveImages(noteID).toString(), "UTF-8");
+                            } catch (UnsupportedEncodingException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                        input_text.setText("");
+                        input_title.setText("");
+                        selectedPhotos.clear();
+                        photoAdapter.notifyDataSetChanged();
+                        voiceRecording = 0;
+                        btn_addvoice.setText("开始录音");
+
+                        // 清除 ChipGroup 中的所有 Chip，保留 Add Tag 按钮
+                        for (int i = chipGroup.getChildCount() - 1; i >= 0; i--) {
+                            View view = chipGroup.getChildAt(i);
+                            if (view instanceof Chip && view != btn_addtag) {
+                                chipGroup.removeView(view);
+                            }
+                        }
+
+                        sendNote(id, noteID, finalTitle, finalText, images[0], tags, finalVoice);
                     }
-                }
-                input_text.setText("");
-                input_title.setText("");
-                selectedPhotos.clear();
-                photoAdapter.notifyDataSetChanged();
-                voiceRecording = 0;
-                btn_addvoice.setText("开始录音");
 
-                // 清除 ChipGroup 中的所有 Chip，保留 Add Tag 按钮
-                for (int i = chipGroup.getChildCount() - 1; i >= 0; i--) {
-                    View view = chipGroup.getChildAt(i);
-                    if (view instanceof Chip && view != btn_addtag) {
-                        chipGroup.removeView(view);
+                    @Override
+                    public void onError(String errorMessage) {
+                        Toast.makeText(getActivity(), "标签生成失败：" + errorMessage, Toast.LENGTH_SHORT).show();
                     }
-                }
-
-                sendNote(id, noteID, title, text, images, tags, voice);
-
+                });
             }
         });
+
+
+
 
         input_tag.setImeOptions(EditorInfo.IME_ACTION_DONE);
         input_tag.setOnFocusChangeListener(new View.OnFocusChangeListener() {

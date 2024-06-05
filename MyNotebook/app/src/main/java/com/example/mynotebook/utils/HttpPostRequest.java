@@ -30,7 +30,7 @@ public class HttpPostRequest {
         Object[] res = new Object[2];
         res[1] = NULL;
         try {
-            url = "http://183.173.102.83:8080" + url;
+            url = "http://183.172.231.132:8080" + url;
             URL path = new URL(url);
             HttpURLConnection con = (HttpURLConnection) path.openConnection();
 

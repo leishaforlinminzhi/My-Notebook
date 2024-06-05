@@ -104,8 +104,8 @@ public class NoteDaoImple implements NoteDao{
 
     @Override
     public List<Note> getByTag(Integer id, String tag) {
-        String sql = "SELECT * FROM Notes WHERE id = ? AND (tags LIKE ?)";
-        String likePattern = "%[" + tag + "]%";
+        String sql = "SELECT * FROM Notes WHERE id = ? AND tags LIKE ?";
+        String likePattern = "%" + tag + "%";
         return jdbcTemplate.query(sql, new Object[]{id, likePattern}, new RowMapper<Note>() {
             @Override
             public Note mapRow(ResultSet resultSet, int i) throws SQLException {
@@ -121,6 +121,7 @@ public class NoteDaoImple implements NoteDao{
             }
         });
     }
+
 
 
     @Override
