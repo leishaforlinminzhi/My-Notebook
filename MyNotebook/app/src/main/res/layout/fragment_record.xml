@@ -40,6 +40,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Search" />
+
+        <!-- 刷新按钮 -->
+        <Button
+            android:id="@+id/buttonRefresh"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Refresh" />
     </LinearLayout>
 
     <!-- RecyclerView -->

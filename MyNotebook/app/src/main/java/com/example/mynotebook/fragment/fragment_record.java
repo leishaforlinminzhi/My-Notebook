@@ -38,6 +38,7 @@ public class fragment_record extends Fragment {
     private EditText editTextSearch;
     private Spinner spinnerSearchType;
     private Button buttonSearch;
+    private Button buttonRefresh;
 
     private Integer id = null;
 
@@ -54,12 +55,17 @@ public class fragment_record extends Fragment {
         editTextSearch = view.findViewById(R.id.editTextSearch);
         spinnerSearchType = view.findViewById(R.id.spinnerSearchType);
         buttonSearch = view.findViewById(R.id.buttonSearch);
+        buttonRefresh = view.findViewById(R.id.buttonRefresh);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         noteAdapter = new NoteAdapter(noteList, this::onNoteClicked, this::onDeleteClicked);
         recyclerView.setAdapter(noteAdapter);
 
         buttonSearch.setOnClickListener(v -> onSearchClicked());
+        buttonRefresh.setOnClickListener(v -> onRefreshClicked());
+
+        // Initial fetch of all notes
+        fetchNotes("/note/getAllNotes");
 
         return view;
     }
@@ -67,8 +73,7 @@ public class fragment_record extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        fetchNotes("/note/getByUserId?id=" + id);
-//        fetchNotes("/note/getAllNotes");
+        // Only refresh if needed, initial fetch handled in onCreateView
     }
 
     private void onNoteClicked(Note note) {
@@ -76,7 +81,6 @@ public class fragment_record extends Fragment {
         intent.putExtra("title", note.getTitle());
         intent.putExtra("text", note.getText());
         intent.putExtra("tags", note.getTags());
-
         intent.putExtra("id", note.getId());
         intent.putExtra("noteID", note.getNoteID());
         intent.putExtra("images", note.getImages());
@@ -110,6 +114,10 @@ public class fragment_record extends Fragment {
         }
 
         fetchNotes(url);
+    }
+
+    private void onRefreshClicked() {
+        fetchNotes("/note/getAllNotes");
     }
 
     private class FetchNotesTask extends AsyncTask<String, Void, Object[]> {
@@ -157,7 +165,7 @@ public class fragment_record extends Fragment {
         protected void onPostExecute(Object[] result) {
             if ("Success".equals(result[0])) {
                 Toast.makeText(getActivity(), "Note deleted successfully", Toast.LENGTH_SHORT).show();
-                onResume();
+                onRefreshClicked();
             } else {
                 Toast.makeText(getActivity(), "Failed to delete note: " + result[0], Toast.LENGTH_SHORT).show();
             }

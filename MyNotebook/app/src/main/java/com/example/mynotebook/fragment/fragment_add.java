@@ -310,9 +310,12 @@ public class fragment_add extends Fragment {
                     @Override
                     public void onTagsGenerated(List<String> generatedTags) {
                         // 添加大模型生成的标签
-                        if (generatedTags.get(0).length() > 0) {
-                            selectedChipTexts[0].addAll(generatedTags);
+                        for (String tag : generatedTags) {
+                            if (!selectedChipTexts[0].contains(tag) && tag.length() > 0) {
+                                selectedChipTexts[0].add(tag);
+                            }
                         }
+
                         String tags;
                         // 编码标签信息
                         try {
