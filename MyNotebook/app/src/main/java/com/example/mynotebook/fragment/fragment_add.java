@@ -26,6 +26,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
@@ -125,7 +126,25 @@ public class fragment_add extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // 处理照片点击事件，例如查看大图或者删除照片
+//                Toast.makeText(getActivity(), Integer.toString(position), Toast.LENGTH_SHORT).show();
+                String[] options = {"删除这张照片", "取消"};
 
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setTitle("提示");
+                builder.setItems(options, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which) {
+                            case 0: //删除图片
+                                selectedPhotos.remove(position);
+                                photoAdapter.notifyDataSetChanged();
+                                break;
+                            case 1:
+                                break;
+                        }
+                    }
+                });
+                builder.show();
             }
         });
 
