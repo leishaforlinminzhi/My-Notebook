@@ -2,4 +2,8 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="noteTagColor">#FF607D8B</color> <!-- 蓝灰色 -->
+    <color name="background">#FF9E9E9E</color> <!-- 更淡的灰色 -->
+    <color name="lighterGray">#FFD3D3D3</color>
+
 </resources>
