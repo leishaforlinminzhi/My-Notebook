@@ -147,7 +147,7 @@
         android:layout_width="366dp"
         android:layout_height="106dp"
         android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.482"
@@ -159,9 +159,9 @@
 
         <Button
             android:id="@+id/btnAddTag"
-            android:layout_width="60dp"
-            android:layout_height="40dp"
-            android:text="+"
+            android:layout_width="140dp"
+            android:layout_height="50dp"
+            android:text="添加tag"
             android:textSize="16sp"
             app:iconPadding="0dp" />
     </com.google.android.material.chip.ChipGroup>

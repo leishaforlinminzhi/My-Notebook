@@ -4,26 +4,51 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <TextView
-        android:id="@+id/textViewTitle"
-        android:layout_width="wrap_content"
+    <!-- 可编辑的标题 -->
+    <EditText
+        android:id="@+id/editTextTitle"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:hint="请输入标题"
         android:textSize="20sp"
         android:textStyle="bold" />
 
-    <TextView
-        android:id="@+id/textViewText"
-        android:layout_width="wrap_content"
+    <!-- 可编辑的正文 -->
+    <EditText
+        android:id="@+id/editTextText"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:hint="请输入文本"
         android:textSize="16sp" />
 
-    <!-- 替换 TextView 为 ChipGroup -->
+    <!-- 标签管理 -->
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/chipGroupTags"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp" />
 
+    <!-- 新标签输入框 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/editTextNewTag"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="输入tag" />
+
+        <Button
+            android:id="@+id/buttonAddTag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="添加tag" />
+    </LinearLayout>
+
+    <!-- 图片管理 -->
     <GridView
         android:id="@+id/gridViewPhotos"
         android:layout_width="match_parent"
@@ -32,15 +57,25 @@
         android:verticalSpacing="8dp"
         android:horizontalSpacing="8dp" />
 
+
+    <!-- 语音播放按钮 -->
     <Button
         android:id="@+id/buttonPlayVoice"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Play Voice" />
+        android:text="播放语音" />
 
+    <!-- 保存按钮 -->
+    <Button
+        android:id="@+id/buttonSave"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="保存" />
+
+    <!-- 返回按钮 -->
     <Button
         android:id="@+id/buttonBack"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Back" />
+        android:text="返回" />
 </LinearLayout>

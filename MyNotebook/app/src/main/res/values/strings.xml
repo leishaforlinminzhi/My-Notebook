@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">MyNotebook</string>
     <string-array name="search_type_array">
-        <item>By Content</item>
-        <item>By Tag</item>
+        <item>通过内容</item>
+        <item>通过Tag</item>
     </string-array>
 </resources>

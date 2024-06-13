@@ -78,7 +78,7 @@ public class HttpGetRequest {
         Object[] res = new Object[2];
         res[1] = null;
         try {
-            url = "http://183.172.231.132:8080" + url; // 修改为你的API URL
+            url = "http://183.172.231.112:8080" + url; // 修改为你的API URL
             URL path = new URL(url);
             HttpURLConnection con = (HttpURLConnection) path.openConnection();
 

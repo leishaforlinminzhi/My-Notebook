@@ -107,7 +107,7 @@ public class fragment_record extends Fragment {
         }
 
         String url;
-        if (searchType.equals("By Content")) {
+        if (searchType.equals("通过内容")) {
             url = "/note/getByKey?id=" + id + "&key=" + keyword;
         } else {
             url = "/note/getByTag?id=" + id + "&tag=" + keyword;
